@@ -1,0 +1,40 @@
+{
+  "plans": {
+    "weight_loss": {
+      "label": "Weight Loss",
+      "dailyCalories": 1700,
+      "macros": { "protein": 40, "carbs": 30, "fats": 30 },
+      "foods": ["Oats", "Eggs", "Chicken Breast", "Broccoli", "Salmon", "Greek Yogurt", "Spinach", "Sweet Potato", "Cottage Cheese", "Lentils"],
+      "meals": {
+        "breakfast": ["Oats with berries (350 kcal)", "Scrambled eggs (200 kcal)"],
+        "lunch": ["Grilled chicken salad (450 kcal)", "Tuna wrap (380 kcal)"],
+        "dinner": ["Salmon with vegetables (520 kcal)", "Chicken stir-fry (480 kcal)"],
+        "snack": ["Greek yogurt (150 kcal)", "Apple with almond butter (180 kcal)"]
+      }
+    },
+    "muscle_gain": {
+      "label": "Muscle Gain",
+      "dailyCalories": 2750,
+      "macros": { "protein": 35, "carbs": 45, "fats": 20 },
+      "foods": ["Rice", "Chicken", "Eggs", "Milk", "Beef", "Pasta", "Banana", "Oats", "Nuts", "Avocado"],
+      "meals": {
+        "breakfast": ["Oats with banana and milk (550 kcal)", "Eggs on toast (480 kcal)"],
+        "lunch": ["Rice with chicken and avocado (700 kcal)", "Pasta with beef (680 kcal)"],
+        "dinner": ["Steak with sweet potato (750 kcal)", "Salmon with rice (680 kcal)"],
+        "snack": ["Protein shake with banana (350 kcal)", "Nuts and milk (300 kcal)"]
+      }
+    },
+    "maintenance": {
+      "label": "Maintenance",
+      "dailyCalories": 2100,
+      "macros": { "protein": 30, "carbs": 40, "fats": 30 },
+      "foods": ["Mixed Grains", "Lean Meat", "Fish", "Vegetables", "Fruits", "Legumes", "Dairy", "Nuts"],
+      "meals": {
+        "breakfast": ["Whole grain cereal with milk (400 kcal)", "Smoothie bowl (380 kcal)"],
+        "lunch": ["Mixed grain bowl (550 kcal)", "Fish tacos (520 kcal)"],
+        "dinner": ["Stir-fry with tofu (500 kcal)", "Chicken and quinoa (520 kcal)"],
+        "snack": ["Fruit and nuts (220 kcal)", "Hummus with veggies (180 kcal)"]
+      }
+    }
+  }
+}

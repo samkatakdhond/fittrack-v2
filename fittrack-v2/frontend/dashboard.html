@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Dashboard — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<script>!function(){var d=localStorage.getItem("darkMode")==="true";document.documentElement.setAttribute("data-theme",d?"light":"dark")}();</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border)}
+.dash-title{font-family:var(--font-display);font-size:1.9rem;letter-spacing:1px;line-height:1}
+.dash-date{font-family:var(--font-condensed);font-size:0.75rem;letter-spacing:1px;color:var(--text-muted);margin-bottom:0.1rem}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin-bottom:1rem}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1rem}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+.two-col-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.ring-row{display:flex;justify-content:space-around;align-items:center;padding:0.75rem 0}
+.ring-item{display:flex;flex-direction:column;align-items:center;gap:0.4rem;text-align:center}
+.ring-label{font-family:var(--font-condensed);font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-secondary)}
+.progress-ring-wrapper{position:relative;width:82px;height:82px}
+.progress-ring-wrapper svg{transform:rotate(-90deg)}
+.progress-ring-track{fill:none;stroke:rgba(255,255,255,0.07)}
+.progress-ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.progress-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-condensed)}
+.progress-ring-label .value{font-size:0.82rem;font-weight:700;line-height:1}
+.progress-ring-label .unit{font-size:0.42rem;letter-spacing:1.5px;color:var(--text-muted);margin-top:2px}
+.workout-list{display:flex;flex-direction:column;gap:0.42rem}
+.workout-entry{display:flex;align-items:center;gap:0.6rem;padding:0.58rem;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--border);transition:border-color 0.2s}
+.workout-entry:hover{border-color:var(--border-accent)}
+.we-icon{font-size:1.1rem;width:30px;height:30px;background:var(--accent-light);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.we-info{flex:1;min-width:0}
+.we-name{font-weight:700;font-size:0.85rem;margin-bottom:0.03rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.we-meta{font-size:0.7rem;color:var(--text-muted)}
+.ml-insight{background:linear-gradient(135deg,rgba(244,80,30,0.08),rgba(244,80,30,0.02));border:1px solid var(--border-accent);border-radius:var(--radius);padding:1rem;height:100%}
+.ml-insight-title{font-family:var(--font-condensed);font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem}
+.insight-item{display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:0.6rem;font-size:0.82rem;color:var(--text-secondary)}
+.insight-item:last-child{margin-bottom:0}
+.insight-icon{font-size:0.9rem;margin-top:0.1rem;flex-shrink:0}
+.progress-bar-wrap{margin-bottom:0.4rem}
+.progress-label{display:flex;justify-content:space-between;font-size:0.73rem;color:var(--text-secondary);margin-bottom:0.28rem;font-family:var(--font-condensed);letter-spacing:0.5px}
+.progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.section-divider{display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.7rem;font-family:var(--font-condensed);font-size:0.63rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted)}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.water-progress-bar{height:10px;background:rgba(255,255,255,0.05);border-radius:5px;overflow:hidden;margin:0.55rem 0}
+.water-progress-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#38bdf8,#0ea5e9);transition:width 1.2s ease;box-shadow:0 0 8px rgba(56,189,248,0.28)}
+.water-stat-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.15rem}
+.water-ml-val{font-family:var(--font-display);font-size:1.45rem;color:#38bdf8;line-height:1}
+.water-goal-txt{font-size:0.7rem;color:var(--text-muted)}
+.water-btn-row{display:flex;gap:0.38rem;flex-wrap:wrap;margin-top:0.6rem}
+.water-btn{padding:0.34rem 0.7rem;border-radius:var(--radius-sm);font-family:var(--font-condensed);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--text-secondary);cursor:pointer;transition:all 0.18s}
+.water-btn:hover{border-color:#38bdf8;color:#38bdf8;background:rgba(56,189,248,0.08)}
+.water-btn.primary-water{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+.water-btn.primary-water:hover{background:#0284c7;box-shadow:0 0 12px rgba(14,165,233,0.35)}
+.streak-numbers-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;margin-bottom:0.9rem}
+.streak-tile{text-align:center;padding:0.8rem 0.3rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;transition:border-color 0.2s}
+.streak-tile:hover{border-color:var(--border-accent)}
+.streak-num{font-family:var(--font-display);font-size:1.9rem;line-height:1;margin-bottom:0.08rem}
+.streak-lbl{font-family:var(--font-condensed);font-size:0.57rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.55rem}
+.badge-item{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:0.6rem 0.25rem;text-align:center;font-size:0.7rem;color:var(--text-secondary);transition:all 0.2s;cursor:default}
+.badge-item:hover{border-color:var(--border-accent);transform:translateY(-2px)}
+.badge-item.earned{background:var(--accent-light);border-color:var(--border-accent);color:var(--accent)}
+.badge-item.earned:hover{box-shadow:0 4px 14px rgba(244,80,30,0.18)}
+.badge-item .badge-emoji{font-size:1.5rem;margin-bottom:0.2rem}
+.badge-name{font-family:var(--font-condensed);font-size:0.6rem;letter-spacing:0.5px;font-weight:700}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;width:90%;max-width:460px;transform:scale(0.93);transition:transform 0.25s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.modal-title{font-family:var(--font-display);font-size:1.5rem;letter-spacing:1px}
+.modal-close{color:var(--text-muted);font-size:1.2rem;cursor:pointer;background:none;border:none;padding:0.2rem}
+.modal-close:hover{color:var(--text-primary)}
+@media(max-width:1280px){.stat-cards{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.bottom-row{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.stat-cards{grid-template-columns:repeat(2,1fr)}.bottom-row{grid-template-columns:1fr}.two-col-row{grid-template-columns:1fr}.badge-grid{grid-template-columns:repeat(2,1fr)}.streak-numbers-row{grid-template-columns:repeat(2,1fr)}.dash-header{flex-direction:column;align-items:flex-start;gap:0.7rem}}
+@media(max-width:480px){.stat-cards{grid-template-columns:1fr}.dash-title{font-size:1.7rem}}
+</style>
+</head>
+<body>
+<div id="navbarMount"></div>
+<div class="app-shell" id="appShell">
+  <div id="sidebarMount"></div>
+  <main class="app-main">
+    <div class="dash-header">
+      <div>
+        <div class="dash-date" id="dashDate">Loading...</div>
+        <div class="dash-title">DASHBOARD</div>
+      </div>
+      <div style="display:flex;gap:0.55rem">
+        <button class="btn btn-outline btn-sm" onclick="openWorkoutModal()">+ Workout</button>
+        <button class="btn btn-primary btn-sm" onclick="openMealModal()">+ Meal</button>
+      </div>
+    </div>
+
+    <!-- Stat Cards with skeleton -->
+    <div class="stat-cards" id="statCards">
+      <div class="card skeleton-card"><div class="skeleton skeleton-val mb-1">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div></div>
+      <div class="card skeleton-card"><div class="skeleton skeleton-val mb-1">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div></div>
+      <div class="card skeleton-card"><div class="skeleton skeleton-val mb-1">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div></div>
+      <div class="card skeleton-card"><div class="skeleton skeleton-val mb-1">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Weekly Activity</span><span class="stat-badge neutral">7-Day</span></div>
+        <div class="chart-wrap" style="height:195px"><canvas id="weeklyChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Activity Rings</span></div>
+        <div class="ring-row">
+          <div class="ring-item">
+            <div class="progress-ring-wrapper">
+              <svg width="82" height="82" viewBox="0 0 82 82"><circle class="progress-ring-track" cx="41" cy="41" r="36" stroke-width="6"/><circle class="progress-ring-fill" id="calorieRing" cx="41" cy="41" r="36" stroke-width="6" stroke-dasharray="226" stroke-dashoffset="226" stroke="#f4501e"/></svg>
+              <div class="progress-ring-label"><span class="value" id="calorieRingVal">0%</span><span class="unit">CAL</span></div>
+            </div><span class="ring-label">Intake</span>
+          </div>
+          <div class="ring-item">
+            <div class="progress-ring-wrapper">
+              <svg width="82" height="82" viewBox="0 0 82 82"><circle class="progress-ring-track" cx="41" cy="41" r="36" stroke-width="6"/><circle class="progress-ring-fill" id="burnRing" cx="41" cy="41" r="36" stroke-width="6" stroke-dasharray="226" stroke-dashoffset="226" stroke="#22c55e"/></svg>
+              <div class="progress-ring-label"><span class="value" id="burnRingVal">0</span><span class="unit">BURN</span></div>
+            </div><span class="ring-label">Burned</span>
+          </div>
+          <div class="ring-item">
+            <div class="progress-ring-wrapper">
+              <svg width="82" height="82" viewBox="0 0 82 82"><circle class="progress-ring-track" cx="41" cy="41" r="36" stroke-width="6"/><circle class="progress-ring-fill" id="bmiRing" cx="41" cy="41" r="36" stroke-width="6" stroke-dasharray="226" stroke-dashoffset="226" stroke="#3b82f6"/></svg>
+              <div class="progress-ring-label"><span class="value" id="bmiRingVal">—</span><span class="unit">BMI</span></div>
+            </div><span class="ring-label">BMI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Today's Workouts</span><a href="workout.html" style="font-size:0.72rem;color:var(--accent)">View All</a></div>
+        <div class="workout-list" id="todayWorkouts">
+          <div class="skeleton-row"><div class="skeleton skeleton-text">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Weekly Goals</span></div>
+        <div id="goalWorkouts"></div>
+        <div id="goalCalories"></div>
+        <hr class="divider">
+        <div style="display:flex;flex-direction:column;gap:0.38rem;font-size:0.82rem;margin-top:0.4rem">
+          <div class="flex-between"><span class="text-secondary">Calories In</span><span class="font-condensed" id="totalCalories">—</span></div>
+          <div class="flex-between"><span class="text-secondary">Burned</span><span class="font-condensed text-green" id="caloriesBurned">—</span></div>
+          <div class="flex-between"><span class="text-secondary">Workouts</span><span class="font-condensed" id="weeklyWorkouts">—</span></div>
+          <div class="flex-between"><span class="text-secondary">BMI</span><span class="font-condensed" id="bmiValue">—</span></div>
+          <div style="font-size:0.68rem;color:var(--text-muted)" id="bmiCategory">Set height &amp; weight in profile</div>
+        </div>
+      </div>
+      <div class="ml-insight">
+        <div class="ml-insight-title">🤖 AI Insights</div>
+        <div id="mlInsights">
+          <div class="skeleton-row"><div class="skeleton skeleton-text">&nbsp;</div><div class="skeleton skeleton-text w-60">&nbsp;</div><div class="skeleton skeleton-text">&nbsp;</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider" id="progress">Progress &amp; Tracking</div>
+    <div class="two-col-row">
+      <div class="card" id="weightProgressCard">
+        <div class="card-header"><span class="card-title">Weight (30 Days)</span><span class="stat-badge neutral" id="weightBadge">Loading…</span></div>
+        <div class="chart-wrap" style="height:155px"><canvas id="weightChart"></canvas></div>
+      </div>
+      <div class="card" id="water">
+        <div class="card-header"><span class="card-title">💧 Water Tracker</span><span class="stat-badge neutral" id="waterPercent">0%</span></div>
+        <div class="water-stat-row"><span class="water-ml-val" id="waterMl">0 ml</span><span class="water-goal-txt" id="waterGoalLbl">Goal: 2500 ml</span></div>
+        <div class="water-progress-bar"><div class="water-progress-fill" id="waterFill" style="width:0%"></div></div>
+        <div id="waterCups" style="display:flex;gap:3px;flex-wrap:wrap;margin:0.35rem 0"></div>
+        <div class="water-btn-row">
+          <button class="water-btn" onclick="logWater(150)">+150ml</button>
+          <button class="water-btn" onclick="logWater(250)">+250ml</button>
+          <button class="water-btn" onclick="logWater(500)">+500ml</button>
+          <button class="water-btn primary-water" onclick="logWater(1000)">+1L</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider" id="streaks">Streaks &amp; Achievements</div>
+    <div class="two-col-row">
+      <div class="card">
+        <div class="card-header"><span class="card-title">🔥 Streaks</span><span class="stat-badge neutral" id="topStreakBadge">Start a streak!</span></div>
+        <div class="streak-numbers-row">
+          <div class="streak-tile"><div class="streak-num" id="streakWorkout">0</div><div class="streak-lbl">Workout</div></div>
+          <div class="streak-tile"><div class="streak-num" id="streakDiet">0</div><div class="streak-lbl">Diet</div></div>
+          <div class="streak-tile"><div class="streak-num" id="streakWater">0</div><div class="streak-lbl">Water</div></div>
+        </div>
+        <div class="badge-grid" id="streakBadges"></div>
+      </div>
+      <div class="card" id="badges">
+        <div class="card-header"><span class="card-title">🏆 Achievements</span><span class="stat-badge neutral" id="badgeCount">0 Earned</span></div>
+        <div class="badge-grid" id="badgeGrid">
+          <div class="skeleton skeleton-text" style="height:58px;border-radius:10px">&nbsp;</div>
+          <div class="skeleton skeleton-text" style="height:58px;border-radius:10px">&nbsp;</div>
+          <div class="skeleton skeleton-text" style="height:58px;border-radius:10px">&nbsp;</div>
+          <div class="skeleton skeleton-text" style="height:58px;border-radius:10px">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Quick Log: Workout -->
+<div class="modal-overlay" id="workoutModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">LOG WORKOUT</div><button class="modal-close" onclick="closeModal('workoutModal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="wType"><option>Cardio</option><option>Strength</option><option>Yoga</option><option>HIIT</option><option>Swimming</option></select></div>
+    <div class="grid-2">
+      <div class="form-group"><label class="form-label">Duration (min)</label><input type="number" class="form-control" id="wDuration" placeholder="30" min="1"></div>
+      <div class="form-group"><label class="form-label">Intensity</label><select class="form-control" id="wIntensity"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+    </div>
+    <button type="button" class="btn btn-primary btn-full" onclick="logWorkout()">Log Workout</button>
+  </div>
+</div>
+
+<!-- Quick Log: Meal -->
+<div class="modal-overlay" id="mealModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">LOG MEAL</div><button class="modal-close" onclick="closeModal('mealModal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="mType"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div>
+    <div class="form-group"><label class="form-label">Calories</label><input type="number" class="form-control" id="mCalories" placeholder="450" min="0"></div>
+    <div class="form-group"><label class="form-label">Food</label><input type="text" class="form-control" id="mFood" placeholder="e.g. Oats with banana"></div>
+    <button type="button" class="btn btn-primary btn-full" onclick="logMeal()">Log Meal</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/navbar.js"></script>
+<script>
+async function loadWater(){try{const d=await apiFetch('/water');const ml=d.total_ml||0,goal=d.goal_ml||2500;const pct=Math.min(Math.round((ml/goal)*100),100);document.getElementById('waterMl').textContent=ml+' ml';document.getElementById('waterGoalLbl').textContent='Goal: '+goal+' ml';document.getElementById('waterFill').style.width=pct+'%';document.getElementById('waterPercent').textContent=pct+'%';const cupsEl=document.getElementById('waterCups');if(cupsEl){const filled=Math.round((ml/goal)*8);cupsEl.innerHTML=Array.from({length:8},(_,i)=>`<span style="font-size:1.05rem;opacity:${i<filled?1:0.22};transition:opacity 0.4s">${i<filled?'🫙':'🫗'}</span>`).join('');}}catch(e){}}
+async function logWater(ml){try{await apiFetch('/water',{method:'POST',body:JSON.stringify({amount_ml:ml})});showToast('💧 +'+ml+'ml logged!','success');loadWater();loadStreaks();}catch(e){showToast('Failed to log water','error');}}
+async function loadStreaks(){try{const d=await apiFetch('/streaks');const s=d.streaks||{};document.getElementById('streakWorkout').textContent=s.workout_streak??0;document.getElementById('streakDiet').textContent=s.diet_streak??0;document.getElementById('streakWater').textContent=s.water_streak??0;const best=Math.max(s.workout_streak||0,s.diet_streak||0,s.water_streak||0);const tb=document.getElementById('topStreakBadge');if(tb)tb.textContent=best>0?'🔥 '+best+' days best':'Start a streak!';const grid=document.getElementById('streakBadges');if(grid&&d.badges){grid.innerHTML=d.badges.map(b=>`<div class="badge-item ${b.earned?'earned':''}"><div class="badge-emoji">${b.emoji}</div><div class="badge-name">${b.name}</div></div>`).join('');}}catch(e){}}
+document.addEventListener('DOMContentLoaded',()=>{const dateEl=document.getElementById('dashDate');if(dateEl&&typeof formatDate==='function')dateEl.textContent=formatDate();loadWater();loadStreaks();});
+</script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

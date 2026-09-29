@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Register — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── Page shell ─────────────────────────────────────────── */
+.auth-page{min-height:100vh;display:flex;align-items:center;padding:2rem 1rem;background:var(--bg-primary)}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 50%,rgba(244,80,30,0.07),transparent);pointer-events:none}
+.auth-container{width:100%;max-width:640px;margin:0 auto;padding-top:5rem}
+.auth-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#ff8c42)}
+
+/* ── Step progress bar ──────────────────────────────────── */
+.step-bar{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:2.5rem}
+.step-dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-condensed);font-size:0.85rem;font-weight:700;color:var(--text-muted);background:var(--bg-secondary);transition:all .3s;position:relative;z-index:1;flex-shrink:0}
+.step-dot.active{border-color:var(--accent);color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 4px rgba(244,80,30,.12)}
+.step-dot.done{border-color:var(--accent);background:var(--accent);color:#fff}
+.step-dot.done::after{content:'✓';font-size:0.9rem}
+.step-dot.done span{display:none}
+.step-line{flex:1;height:2px;background:var(--border);max-width:80px;transition:background .4s}
+.step-line.done{background:var(--accent)}
+.step-label{font-family:var(--font-condensed);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);text-align:center;margin-top:0.35rem}
+
+/* Step labels row */
+.step-labels{display:flex;justify-content:space-between;margin-top:0.5rem;padding:0 0}
+.step-label-item{font-family:var(--font-condensed);font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);text-align:center;flex:1}
+.step-label-item.active{color:var(--accent)}
+
+/* ── Step panels ────────────────────────────────────────── */
+.step-panel{display:none;animation:fadeInStep .3s ease}
+.step-panel.active{display:block}
+@keyframes fadeInStep{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+
+.step-title{font-family:var(--font-display);font-size:1.9rem;letter-spacing:1px;margin-bottom:0.3rem}
+.step-sub{color:var(--text-secondary);font-size:0.88rem;margin-bottom:1.8rem}
+
+/* ── 2-col grid ─────────────────────────────────────────── */
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:500px){.row-2,.row-3{grid-template-columns:1fr}}
+
+/* ── Goal cards ─────────────────────────────────────────── */
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem}
+.goal-card{border:2px solid var(--border);border-radius:12px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-secondary)}
+.goal-card:hover{border-color:var(--border-accent);background:var(--accent-light)}
+.goal-card.selected{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 3px rgba(244,80,30,.15)}
+.goal-card .goal-emoji{font-size:1.8rem;margin-bottom:0.4rem}
+.goal-card .goal-name{font-family:var(--font-condensed);font-size:0.82rem;font-weight:700;letter-spacing:0.5px;color:var(--text-primary)}
+.goal-card .goal-desc{font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem}
+
+/* ── BMI Preview card ───────────────────────────────────── */
+.bmi-preview{background:linear-gradient(135deg,rgba(244,80,30,0.08),rgba(244,80,30,0.03));border:1px solid var(--border-accent);border-radius:14px;padding:1.25rem;margin-top:1.25rem;display:none}
+.bmi-preview.show{display:block}
+.bmi-preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.bmi-preview-title{font-family:var(--font-condensed);font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.bmi-preview-value{font-family:var(--font-display);font-size:2.2rem;font-weight:700;letter-spacing:1px}
+.bmi-preview-cat{font-family:var(--font-condensed);font-size:0.78rem;letter-spacing:1px;margin-top:0.1rem}
+
+/* BMI range bar */
+.bmi-bar-wrap{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,#3b82f6 0%,#22c55e 30%,#facc15 60%,#f4501e 100%);margin:0.75rem 0 1.25rem;overflow:visible}
+.bmi-bar-needle{position:absolute;top:-5px;width:4px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,.5);transform:translateX(-50%);transition:left .5s ease}
+.bmi-bar-labels{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text-muted);font-family:var(--font-condensed);letter-spacing:0.5px}
+
+/* BMI stats row */
+.bmi-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-top:0.5rem}
+.bmi-stat{text-align:center;padding:0.6rem;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border)}
+.bmi-stat-val{font-family:var(--font-condensed);font-size:1rem;font-weight:700;color:var(--text-primary)}
+.bmi-stat-lbl{font-size:0.62rem;color:var(--text-muted);margin-top:0.15rem}
+
+/* ── Nav buttons ────────────────────────────────────────── */
+.step-nav{display:flex;gap:0.75rem;margin-top:1.75rem}
+.step-nav .btn{flex:1}
+
+/* ── Summary (step 3 review) ────────────────────────────── */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.5rem}
+.summary-item{background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem}
+.summary-label{font-family:var(--font-condensed);font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.25rem}
+.summary-value{font-size:0.92rem;font-weight:700;color:var(--text-primary)}
+.summary-bmi-block{background:var(--accent-light);border:1px solid var(--border-accent);border-radius:12px;padding:1rem;text-align:center;grid-column:span 2;margin-bottom:0.5rem}
+.summary-bmi-block .big{font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--accent)}
+.summary-bmi-block .lbl{font-family:var(--font-condensed);font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-secondary)}
+.summary-bmi-block .cat{font-size:0.9rem;font-weight:600;margin-top:0.2rem}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">FIT<span>TRACK</span></a>
+  <div class="nav-links">
+    <span class="text-secondary text-sm">Already have an account?</span>
+    <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+  </div>
+</nav>
+
+<div class="auth-bg"></div>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <!-- Step progress bar -->
+      <div class="step-bar">
+        <div class="step-dot active" id="dot1"><span>1</span></div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-dot" id="dot2"><span>2</span></div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-dot" id="dot3"><span>3</span></div>
+      </div>
+      <div class="step-labels">
+        <div class="step-label-item active" id="lbl1">Account</div>
+        <div class="step-label-item" id="lbl2">Body Metrics</div>
+        <div class="step-label-item" id="lbl3">Confirm</div>
+      </div>
+
+      <!-- ═══ STEP 1 — Account Info ═══════════════════════════ -->
+      <div class="step-panel active" id="step1">
+        <div style="margin-top:1.75rem">
+          <div class="step-title">CREATE ACCOUNT</div>
+          <div class="step-sub">Start your fitness journey. Totally free.</div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <div class="input-wrapper">
+                <span class="input-icon">👤</span>
+                <input type="text" id="name" class="form-control" placeholder="John Doe">
+              </div>
+              <div class="form-error" id="nameError">Please enter your full name</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="gender" class="form-control">
+                <option value="">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉️</span>
+              <input type="email" id="email" class="form-control" placeholder="john@example.com">
+            </div>
+            <div class="form-error" id="emailError">Please enter a valid email</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="password" class="form-control" placeholder="Min. 8 characters">
+              <button type="button" class="input-toggle" onclick="togglePwd('password',this)">👁</button>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+              <span class="strength-text" id="strengthText">Enter a password</span>
+            </div>
+            <div class="form-error" id="passwordError">Password must be at least 8 characters</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Repeat password">
+              <button type="button" class="input-toggle" onclick="togglePwd('confirmPassword',this)">👁</button>
+            </div>
+            <div class="form-error" id="confirmPasswordError">Passwords do not match</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fitness Goal</label>
+            <div class="goal-grid">
+              <div class="goal-card" data-val="weight_loss" onclick="selectGoal(this)">
+                <div class="goal-emoji">🔥</div>
+                <div class="goal-name">Weight Loss</div>
+                <div class="goal-desc">Burn fat, slim down</div>
+              </div>
+              <div class="goal-card" data-val="muscle_gain" onclick="selectGoal(this)">
+                <div class="goal-emoji">💪</div>
+                <div class="goal-name">Muscle Gain</div>
+                <div class="goal-desc">Build strength & mass</div>
+              </div>
+              <div class="goal-card" data-val="maintenance" onclick="selectGoal(this)">
+                <div class="goal-emoji">⚖️</div>
+                <div class="goal-name">Maintenance</div>
+                <div class="goal-desc">Stay fit & balanced</div>
+              </div>
+              <div class="goal-card" data-val="endurance" onclick="selectGoal(this)">
+                <div class="goal-emoji">🏃</div>
+                <div class="goal-name">Endurance</div>
+                <div class="goal-desc">Run further, last longer</div>
+              </div>
+            </div>
+            <input type="hidden" id="goal">
+            <div class="form-error" id="goalError">Please select a fitness goal</div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-group">
+              <input type="checkbox" id="terms">
+              <span>I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a></span>
+            </label>
+            <div class="form-error" id="termsError">You must accept the terms</div>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-full btn-lg" onclick="goStep2()">
+            Continue &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 2 — Body Metrics ════════════════════════════ -->
+      <div class="step-panel" id="step2">
+        <div style="margin-top:1.75rem">
+          <div class="step-title">BODY METRICS</div>
+          <div class="step-sub">Help us personalise your plan and calculate your BMI instantly.</div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🎂</span>
+                <input type="number" id="age" class="form-control" placeholder="25" min="10" max="100" oninput="updateBMIPreview()">
+              </div>
+              <div class="form-error" id="ageError">Enter a valid age (10–100)</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Height (cm)</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📏</span>
+                <input type="number" id="height" class="form-control" placeholder="175" min="100" max="250" oninput="updateBMIPreview()">
+              </div>
+              <div class="form-error" id="heightError">Enter a valid height (100–250 cm)</div>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label class="form-label">Current Weight (kg)</label>
+              <div class="input-wrapper">
+                <span class="input-icon">⚖️</span>
+                <input type="number" id="weight" class="form-control" placeholder="70" min="20" max="300" step="0.1" oninput="updateBMIPreview()">
+              </div>
+              <div class="form-error" id="weightError">Enter a valid weight (20–300 kg)</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Weight (kg)</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🎯</span>
+                <input type="number" id="targetWeight" class="form-control" placeholder="65" min="20" max="300" step="0.1">
+              </div>
+              <div class="form-error" id="targetWeightError">Enter a valid target (20–300 kg)</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Activity Level</label>
+            <select id="activityLevel" class="form-control">
+              <option value="sedentary">🛋️ Sedentary (little or no exercise)</option>
+              <option value="light">🚶 Lightly Active (1–3 days/week)</option>
+              <option value="moderate" selected>🏃 Moderately Active (3–5 days/week)</option>
+              <option value="active">💪 Very Active (6–7 days/week)</option>
+            </select>
+          </div>
+
+          <!-- Live BMI Preview -->
+          <div class="bmi-preview" id="bmiPreview">
+            <div class="bmi-preview-header">
+              <div>
+                <div class="bmi-preview-title">⚡ Live BMI Preview</div>
+                <div class="bmi-preview-value" id="bmiPreviewVal">—</div>
+                <div class="bmi-preview-cat" id="bmiPreviewCat" style="color:var(--green)">—</div>
+              </div>
+              <div style="text-align:right;font-size:0.78rem;color:var(--text-muted)">
+                <div id="bmiPreviewWt">— kg</div>
+                <div id="bmiPreviewHt">— cm</div>
+              </div>
+            </div>
+
+            <!-- BMI bar -->
+            <div class="bmi-bar-wrap">
+              <div class="bmi-bar-needle" id="bmiNeedle" style="left:0%"></div>
+            </div>
+            <div class="bmi-bar-labels">
+              <span>Underweight<br>&lt;18.5</span>
+              <span style="text-align:center">Normal<br>18.5–25</span>
+              <span style="text-align:center">Overweight<br>25–30</span>
+              <span style="text-align:right">Obese<br>&gt;30</span>
+            </div>
+
+            <!-- Stats row -->
+            <div class="bmi-stats" id="bmiStatsRow" style="margin-top:1rem"></div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" onclick="goStep(1)">&larr; Back</button>
+            <button type="button" class="btn btn-primary" onclick="goStep3()">Review &rarr;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ STEP 3 — Review & Confirm ════════════════════════ -->
+      <div class="step-panel" id="step3">
+        <div style="margin-top:1.75rem">
+          <div class="step-title">REVIEW & CONFIRM</div>
+          <div class="step-sub">Everything look good? We'll send a verification code to your email to activate your account.</div>
+
+          <div class="summary-grid" id="summaryGrid">
+            <!-- populated by JS -->
+          </div>
+
+          <div class="form-group" style="margin-top:1rem">
+            <label class="checkbox-group" id="termsRow2">
+              <!-- checkbox echoed for clarity — already validated in step 1 -->
+              <span style="font-size:0.82rem;color:var(--text-secondary)">✅ Terms &amp; Conditions accepted</span>
+            </label>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" onclick="goStep(2)">&larr; Back</button>
+            <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="submitRegister()">
+              <span id="submitText">📧 Send Verification Code</span>
+              <span class="spinner hidden" id="submitSpinner"></span>
+            </button>
+          </div>
+
+          <div style="text-align:center;margin-top:1.25rem;font-size:0.82rem;color:var(--text-secondary)">
+            Already have an account? <a href="login.html" style="color:var(--accent)">Log In</a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /auth-card -->
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script>
+// ── State ────────────────────────────────────────────────────
+let currentStep = 1;
+
+// ── Step UI ──────────────────────────────────────────────────
+function goStep(n) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('step' + n).classList.add('active');
+
+  // Update dots and lines
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    const lbl = document.getElementById('lbl' + i);
+    dot.classList.remove('active','done');
+    lbl.classList.remove('active');
+    if (i < n)      { dot.classList.add('done'); }
+    else if (i === n){ dot.classList.add('active'); lbl.classList.add('active'); }
+    if (i <= 2) {
+      const line = document.getElementById('line' + i);
+      line.classList.toggle('done', i < n);
+    }
+  }
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── Goal card selection ──────────────────────────────────────
+function selectGoal(el) {
+  document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('goal').value = el.dataset.val;
+  document.getElementById('goalError').classList.remove('show');
+}
+
+// ── Password strength ────────────────────────────────────────
+document.getElementById('password').addEventListener('input', function() {
+  const val = this.value;
+  const fill = document.getElementById('strengthFill');
+  const text = document.getElementById('strengthText');
+  if (!fill) return;
+  if (val.length < 6)                              { fill.className='strength-fill weak';   text.textContent='Too weak'; }
+  else if (val.length < 10 || !/[0-9]/.test(val)) { fill.className='strength-fill medium'; text.textContent='Medium strength'; }
+  else                                             { fill.className='strength-fill strong'; text.textContent='Strong password ✓'; }
+});
+
+// ── Step 1 validation ────────────────────────────────────────
+function goStep2() {
+  let valid = true;
+  const clearErrors = () => document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+  const showError   = (id, msg) => { const el=document.getElementById(id); if(el){el.textContent=msg;el.classList.add('show');} valid=false; };
+  clearErrors();
+
+  const name     = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirmPassword').value;
+  const goal     = document.getElementById('goal').value;
+  const terms    = document.getElementById('terms').checked;
+
+  if (!name)                                          showError('nameError',            'Please enter your full name');
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) showError('emailError',           'Please enter a valid email');
+  if (!password || password.length < 8)               showError('passwordError',        'Password must be at least 8 characters');
+  if (password !== confirm)                           showError('confirmPasswordError', 'Passwords do not match');
+  if (!goal)                                          showError('goalError',            'Please select a fitness goal');
+  if (!terms)                                         showError('termsError',           'You must accept the terms');
+  if (valid) goStep(2);
+}
+
+// ── Live BMI preview ─────────────────────────────────────────
+function updateBMIPreview() {
+  const h   = parseFloat(document.getElementById('height').value);
+  const w   = parseFloat(document.getElementById('weight').value);
+  const preview = document.getElementById('bmiPreview');
+
+  if (!h || !w || h < 100 || w < 20) { preview.classList.remove('show'); return; }
+
+  const bmi = Math.round((w / Math.pow(h / 100, 2)) * 10) / 10;
+  const categories = [
+    { max: 18.5, label: 'Underweight', color: '#3b82f6' },
+    { max: 25,   label: 'Normal Weight', color: '#22c55e' },
+    { max: 30,   label: 'Overweight', color: '#facc15' },
+    { max: 99,   label: 'Obese', color: '#f4501e' },
+  ];
+  const cat = categories.find(c => bmi < c.max) || categories[3];
+
+  document.getElementById('bmiPreviewVal').textContent = bmi.toFixed(1);
+  document.getElementById('bmiPreviewCat').textContent = cat.label;
+  document.getElementById('bmiPreviewCat').style.color = cat.color;
+  document.getElementById('bmiPreviewWt').textContent  = w + ' kg';
+  document.getElementById('bmiPreviewHt').textContent  = h + ' cm';
+
+  // Position needle: BMI 10 = 0%, BMI 40 = 100%
+  const pct = Math.min(Math.max(((bmi - 10) / 30) * 100, 0), 100);
+  document.getElementById('bmiNeedle').style.left = pct + '%';
+
+  // Ideal weight range
+  const idealMin = Math.round(18.5 * Math.pow(h / 100, 2) * 10) / 10;
+  const idealMax = Math.round(24.9 * Math.pow(h / 100, 2) * 10) / 10;
+  const toGo     = parseFloat((w - idealMax).toFixed(1));
+
+  document.getElementById('bmiStatsRow').innerHTML = `
+    <div class="bmi-stat"><div class="bmi-stat-val">${idealMin}–${idealMax}</div><div class="bmi-stat-lbl">Ideal Weight (kg)</div></div>
+    <div class="bmi-stat"><div class="bmi-stat-val" style="color:${cat.color}">${cat.label}</div><div class="bmi-stat-lbl">Category</div></div>
+    <div class="bmi-stat"><div class="bmi-stat-val">${toGo > 0 ? '+'+toGo : toGo} kg</div><div class="bmi-stat-lbl">vs Ideal Max</div></div>`;
+
+  preview.classList.add('show');
+}
+
+// ── Step 2 validation → Step 3 ───────────────────────────────
+function goStep3() {
+  let valid = true;
+  const clearErrors = () => document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+  const showError   = (id, msg) => { const el=document.getElementById(id); if(el){el.textContent=msg;el.classList.add('show');} valid=false; };
+  clearErrors();
+
+  const age    = parseFloat(document.getElementById('age').value);
+  const height = parseFloat(document.getElementById('height').value);
+  const weight = parseFloat(document.getElementById('weight').value);
+  const target = parseFloat(document.getElementById('targetWeight').value);
+
+  if (!age    || age    < 10 || age    > 100) showError('ageError',          'Enter a valid age (10–100)');
+  if (!height || height < 100 || height > 250) showError('heightError',      'Enter a valid height (100–250 cm)');
+  if (!weight || weight < 20  || weight > 300) showError('weightError',      'Enter a valid weight (20–300 kg)');
+  if (target  && (target < 20 || target > 300)) showError('targetWeightError','Enter a valid target weight');
+  if (!valid) return;
+
+  buildSummary();
+  goStep(3);
+}
+
+const goalLabels = {weight_loss:'🔥 Weight Loss',muscle_gain:'💪 Muscle Gain',maintenance:'⚖️ Maintenance',endurance:'🏃 Endurance'};
+const actLabels  = {sedentary:'🛋️ Sedentary',light:'🚶 Lightly Active',moderate:'🏃 Moderately Active',active:'💪 Very Active'};
+
+function buildSummary() {
+  const name     = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const goal     = document.getElementById('goal').value;
+  const gender   = document.getElementById('gender').value || 'Not specified';
+  const age      = document.getElementById('age').value;
+  const height   = document.getElementById('height').value;
+  const weight   = document.getElementById('weight').value;
+  const target   = document.getElementById('targetWeight').value;
+  const activity = document.getElementById('activityLevel').value;
+
+  const bmi      = weight && height ? Math.round((weight / Math.pow(height/100,2))*10)/10 : null;
+  const categories = [{max:18.5,label:'Underweight',color:'#3b82f6'},{max:25,label:'Normal Weight',color:'#22c55e'},{max:30,label:'Overweight',color:'#facc15'},{max:99,label:'Obese',color:'#f4501e'}];
+  const cat      = bmi ? (categories.find(c=>bmi<c.max)||categories[3]) : null;
+
+  const items = [
+    {l:'Full Name',    v: name},
+    {l:'Email',        v: email},
+    {l:'Fitness Goal', v: goalLabels[goal] || goal},
+    {l:'Gender',       v: gender.charAt(0).toUpperCase()+gender.slice(1)},
+    {l:'Age',          v: age + ' years'},
+    {l:'Height',       v: height + ' cm'},
+    {l:'Weight',       v: weight + ' kg'},
+    {l:'Target',       v: (target||'—') + (target?' kg':'')},
+    {l:'Activity',     v: actLabels[activity]||activity},
+  ];
+
+  let html = '';
+  if (bmi && cat) {
+    html += `<div class="summary-bmi-block">
+      <div class="lbl">YOUR BMI</div>
+      <div class="big" style="color:${cat.color}">${bmi.toFixed(1)}</div>
+      <div class="cat" style="color:${cat.color}">${cat.label}</div>
+    </div>`;
+  }
+  html += items.map(i=>`<div class="summary-item"><div class="summary-label">${i.l}</div><div class="summary-value">${i.v}</div></div>`).join('');
+  document.getElementById('summaryGrid').innerHTML = html;
+}
+
+// ── Final submit ─────────────────────────────────────────────
+async function submitRegister() {
+  const btn     = document.getElementById('submitBtn');
+  const btnText = document.getElementById('submitText');
+  const spinner = document.getElementById('submitSpinner');
+  btn.disabled  = true;
+  btnText.textContent = 'Sending verification code…';
+  spinner.classList.remove('hidden');
+
+  const email = document.getElementById('email').value.trim();
+
+  const payload = {
+    name:           document.getElementById('name').value.trim(),
+    email:          email,
+    password:       document.getElementById('password').value,
+    goal:           document.getElementById('goal').value,
+    gender:         document.getElementById('gender').value,
+    age:            parseInt(document.getElementById('age').value)    || null,
+    height:         parseFloat(document.getElementById('height').value) || null,
+    weight:         parseFloat(document.getElementById('weight').value) || null,
+    target_weight:  parseFloat(document.getElementById('targetWeight').value) || null,
+    activity_level: document.getElementById('activityLevel').value,
+  };
+
+  try {
+    // Step 1: Send registration data → backend sends OTP to email
+    await apiFetch('/auth/register', { method:'POST', body: JSON.stringify(payload) });
+    showToast('Verification code sent to your email! 📧', 'success');
+    // Step 2: Redirect to OTP verification page
+    setTimeout(() => {
+      window.location.href = `verify-otp.html?purpose=register&email=${encodeURIComponent(email)}`;
+    }, 1000);
+  } catch (err) {
+    showToast(err.message || 'Registration failed', 'error');
+    btn.disabled = false;
+    btnText.textContent = '🚀 Create My Account';
+    spinner.classList.add('hidden');
+  }
+}
+</script>
+</body>
+</html>

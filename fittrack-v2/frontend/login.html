@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Login — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.auth-page{min-height:100vh;display:flex;align-items:center;padding:2rem 1rem;background:var(--bg-primary)}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 70% 50%,rgba(244,80,30,0.06),transparent);pointer-events:none}
+.auth-container{width:100%;max-width:460px;margin:0 auto}
+.auth-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;margin-top:5rem}
+.auth-logo{text-align:center;margin-bottom:2rem}
+.auth-logo a{font-family:var(--font-display);font-size:2rem;letter-spacing:2px}
+.auth-logo span{color:var(--accent)}
+.auth-title{font-family:var(--font-display);font-size:2.5rem;letter-spacing:1px;text-align:center;margin-bottom:0.5rem}
+.auth-sub{text-align:center;color:var(--text-secondary);font-size:0.9rem;margin-bottom:2rem}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">FIT<span>TRACK</span></a>
+  <div class="nav-links">
+    <span class="text-secondary text-sm">New here?</span>
+    <a href="register.html" class="btn btn-primary btn-sm">Sign Up Free</a>
+  </div>
+</nav>
+<div class="auth-bg"></div>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo"><a href="index.html"><img src="assets/logo.png" alt="FitTrack Pro" style="height:48px"></a></div>
+      <h1 class="auth-title">WELCOME BACK</h1>
+      <p class="auth-sub">Log in to continue your fitness journey</p>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required>
+          </div>
+          <div class="form-error" id="emailError">Please enter a valid email</div>
+        </div>
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+            <label class="form-label" style="margin:0">Password</label>
+            <a href="forgot-password.html" style="font-size:0.8rem;color:var(--accent)">Forgot password?</a>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Your password" required>
+            <button type="button" class="input-toggle" onclick="togglePwd('password',this)">👁</button>
+          </div>
+          <div class="form-error" id="passwordError">Please enter your password</div>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-group">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me for 30 days</span>
+          </label>
+        </div>
+        <div class="form-error" id="loginError" style="font-size:0.88rem;padding:0.75rem;background:rgba(239,68,68,0.1);border-radius:6px;border:1px solid rgba(239,68,68,0.2);margin-bottom:1rem"></div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
+          <span id="submitText">Log In</span>
+          <span class="spinner hidden" id="submitSpinner"></span>
+        </button>
+      </form>
+      <div class="divider-text"><span>or</span></div>
+      <div class="text-center text-sm" style="color:var(--text-secondary)">Don't have an account? <a href="register.html" style="color:var(--accent)">Sign Up Free</a></div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

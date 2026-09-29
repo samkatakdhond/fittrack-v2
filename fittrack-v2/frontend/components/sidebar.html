@@ -1,0 +1,55 @@
+<!-- ══════════════════════════════════════════════════════
+     FitTrack Global Sidebar Component
+     Loaded by js/navbar.js on every app page
+     The active link is set by JS based on current page.
+══════════════════════════════════════════════════════ -->
+<div class="sidebar-overlay" onclick="closeSidebar()" id="sidebarOverlay"></div>
+
+<aside class="app-sidebar" id="appSidebar">
+  <div class="sidebar-section-label">Main</div>
+  <nav class="sidebar-nav-group">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard" data-tooltip="Dashboard">
+      <span class="sidebar-icon">📊</span><span class="sidebar-label">Dashboard</span>
+    </a>
+    <a href="workout.html" class="sidebar-link" data-page="workout" data-tooltip="Workouts">
+      <span class="sidebar-icon">💪</span><span class="sidebar-label">Workouts</span>
+    </a>
+    <a href="diet.html" class="sidebar-link" data-page="diet" data-tooltip="Nutrition">
+      <span class="sidebar-icon">🥗</span><span class="sidebar-label">Nutrition</span>
+    </a>
+    <a href="chat.html" class="sidebar-link" data-page="chat" data-tooltip="FitBot AI">
+      <span class="sidebar-icon">🤖</span><span class="sidebar-label">FitBot AI</span>
+    </a>
+    <a href="profile.html" class="sidebar-link" data-page="profile" data-tooltip="Profile">
+      <span class="sidebar-icon">👤</span><span class="sidebar-label">Profile</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section-label">Analysis</div>
+  <nav class="sidebar-nav-group">
+    <a href="dashboard.html#ml" class="sidebar-link" data-tooltip="ML Insights">
+      <span class="sidebar-icon">📈</span><span class="sidebar-label">ML Insights</span>
+    </a>
+    <a href="dashboard.html#progress" class="sidebar-link" data-tooltip="Progress">
+      <span class="sidebar-icon">📊</span><span class="sidebar-label">Progress</span>
+    </a>
+    <a href="dashboard.html#badges" class="sidebar-link" data-tooltip="Achievements">
+      <span class="sidebar-icon">🏆</span><span class="sidebar-label">Achievements</span>
+    </a>
+    <a href="dashboard.html#water" class="sidebar-link" data-tooltip="Water Tracker">
+      <span class="sidebar-icon">💧</span><span class="sidebar-label">Water Tracker</span>
+    </a>
+    <a href="dashboard.html#streaks" class="sidebar-link" data-tooltip="Streaks">
+      <span class="sidebar-icon">🔥</span><span class="sidebar-label">Streaks</span>
+    </a>
+  </nav>
+
+  <!-- Profile mini at bottom -->
+  <div class="sidebar-profile-mini" id="sidebarProfileMini">
+    <div class="sidebar-avatar-mini" id="sidebarAvatarMini">?</div>
+    <div class="sidebar-profile-name" id="sidebarProfileName">Loading...</div>
+    <button class="sidebar-logout-mini" onclick="logout()" title="Logout">⏻</button>
+  </div>
+</aside>

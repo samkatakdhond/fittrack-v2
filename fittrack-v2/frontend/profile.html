@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Profile — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<script>!function(){var d=localStorage.getItem("darkMode")==="true";document.documentElement.setAttribute("data-theme",d?"light":"dark")}();</script>
+<style>
+.profile-layout{max-width:960px;margin:0 auto;padding:2.5rem 2rem}
+.profile-hero{background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:2rem;display:flex;align-items:center;gap:2rem}
+.profile-avatar-big{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:2rem;color:#fff;border:3px solid var(--border-accent)}
+.profile-info h2{font-family:var(--font-display);font-size:2rem;letter-spacing:1px;margin-bottom:0.25rem}
+.profile-info .meta{color:var(--text-secondary);font-size:0.9rem}
+.profile-stats-row{display:flex;gap:2rem;margin-top:1rem}
+.pstat{text-align:center}
+.pstat-val{font-family:var(--font-display);font-size:1.8rem;color:var(--text-primary)}
+.pstat-lbl{font-family:var(--font-condensed);font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)}
+.avatar-wrap{position:relative;cursor:pointer;flex-shrink:0}
+.avatar-wrap .profile-avatar-big{transition:opacity 0.2s}
+.avatar-wrap:hover .profile-avatar-big{opacity:0.6}
+.avatar-overlay{position:absolute;bottom:0;right:0;background:var(--accent);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;border:2px solid var(--bg-card);pointer-events:none}
+.pfp-img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border-accent)}
+.avatar-remove-btn{background:none;border:none;color:var(--text-muted);font-size:0.75rem;cursor:pointer;margin-top:0.4rem;display:block;text-align:center;font-family:var(--font-condensed);letter-spacing:0.5px}
+.avatar-remove-btn:hover{color:#f4501e}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:768px){.profile-grid{grid-template-columns:1fr}.profile-hero{flex-direction:column;text-align:center}.profile-stats-row{justify-content:center}}
+</style>
+</head>
+<body>
+<div id="navbarMount"></div>
+<div class="app-shell" id="appShell">
+  <div id="sidebarMount"></div>
+  <main class="app-main">
+      <div class="profile-layout">
+    <!-- HERO -->
+    <div class="profile-hero">
+      <!-- Profile Picture Upload -->
+      <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()" title="Click to change photo">
+        <div class="profile-avatar-big" id="profileAvatar">JD</div>
+        <div class="avatar-overlay">📷</div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      </div>
+      <div class="profile-info">
+        <h2 id="profileName">JOHN DOE</h2>
+        <div class="meta" id="profileGoal">Goal: Weight Loss · Member since Feb 2026</div>
+        <div class="profile-stats-row">
+          <div class="pstat"><div class="pstat-val" id="profileBMI">—</div><div class="pstat-lbl">BMI</div></div>
+          <div class="pstat"><div class="pstat-val" id="profileWorkouts">—</div><div class="pstat-lbl">Workouts</div></div>
+          <div class="pstat"><div class="pstat-val" id="profileStreak">—</div><div class="pstat-lbl">Day Streak</div></div>
+          <div class="pstat"><div class="pstat-val" id="profileLost">—</div><div class="pstat-lbl">Progress</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <!-- PERSONAL INFO -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Personal Info</span><button class="btn btn-sm btn-outline" onclick="editProfile()">Edit</button></div>
+        <form id="profileForm">
+          <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-control" id="pName" placeholder="Your name"></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="pEmail" placeholder="Email" readonly style="opacity:0.6"></div>
+          <div class="form-group"><label class="form-label">Age</label><input type="number" class="form-control" id="pAge" placeholder="25" min="10" max="100"></div>
+          <div class="form-group"><label class="form-label">Gender</label>
+            <select class="form-control" id="pGender"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Activity Level</label>
+            <select class="form-control" id="pActivity">
+              <option value="sedentary">Sedentary</option>
+              <option value="light">Lightly Active</option>
+              <option value="moderate">Moderately Active</option>
+              <option value="active">Very Active</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary btn-full hidden" id="saveProfileBtn" onclick="saveProfile()">Save Changes</button>
+        </form>
+      </div>
+
+      <!-- BODY METRICS -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Body Metrics</span><span class="badge badge-blue">Auto BMI</span></div>
+        <div class="form-group"><label class="form-label">Height (cm)</label><input type="number" class="form-control" id="pHeight" placeholder="175" min="100" max="250" oninput="calcBMI()"></div>
+        <div class="form-group"><label class="form-label">Current Weight (kg)</label><input type="number" class="form-control" id="pWeight" placeholder="70" min="30" max="300" oninput="calcBMI()"></div>
+        <div class="form-group"><label class="form-label">Target Weight (kg)</label><input type="number" class="form-control" id="pTargetWeight" placeholder="65" min="30" max="300"></div>
+        <div class="form-group"><label class="form-label">Fitness Goal</label>
+          <select class="form-control" id="pGoal">
+            <option value="weight_loss">🔥 Weight Loss</option>
+            <option value="muscle_gain">💪 Muscle Gain</option>
+            <option value="maintenance">⚖️ Maintenance</option>
+            <option value="endurance">🏃 Endurance</option>
+          </select>
+        </div>
+        <!-- BMI DISPLAY -->
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-sm);padding:1rem;margin-top:0.5rem">
+          <div class="flex-between mb-1">
+            <span class="card-title">Calculated BMI</span>
+            <span class="font-display text-accent" style="font-size:1.6rem" id="calcBMI">—</span>
+          </div>
+          <div class="text-sm text-secondary" id="bmiStatus">Enter height &amp; weight above</div>
+          <div style="height:6px;background:linear-gradient(90deg,#3b82f6,#22c55e,#facc15,#f4501e);border-radius:3px;margin-top:0.75rem;position:relative">
+            <div id="bmiIndicator" style="position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translateX(-50%);left:50%;transition:left 0.3s"></div>
+          </div>
+          <div class="flex-between mt-1" style="font-size:0.65rem;color:var(--text-muted);font-family:var(--font-condensed);letter-spacing:0.5px">
+            <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-full mt-3" onclick="saveMetrics()">Save Metrics</button>
+      </div>
+    </div>
+
+    <!-- CHANGE PASSWORD -->
+    <div class="card mt-3">
+      <div class="card-header"><span class="card-title">Change Password</span></div>
+      <div class="grid-3">
+        <div class="form-group"><label class="form-label">Current Password</label><div class="input-wrapper"><input type="password" class="form-control" id="curPwd" placeholder="Current password"><button type="button" class="input-toggle" onclick="togglePwd('curPwd',this)">👁</button></div></div>
+        <div class="form-group"><label class="form-label">New Password</label><div class="input-wrapper"><input type="password" class="form-control" id="newPwd" placeholder="New password"><button type="button" class="input-toggle" onclick="togglePwd('newPwd',this)">👁</button></div></div>
+        <div class="form-group"><label class="form-label">Confirm New</label><div class="input-wrapper"><input type="password" class="form-control" id="confirmPwd" placeholder="Repeat new password"><button type="button" class="input-toggle" onclick="togglePwd('confirmPwd',this)">👁</button></div></div>
+      </div>
+      <button type="button" class="btn btn-outline" onclick="changePassword()">Update Password</button>
+    </div>
+  </div><!-- /profile-layout -->
+    </main>
+</div><!-- /app-shell -->
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

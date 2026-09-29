@@ -1,0 +1,53 @@
+{
+  "plans": {
+    "beginner": {
+      "label": "Beginner",
+      "duration": "8 weeks",
+      "sessionsPerWeek": 3,
+      "schedule": [
+        { "day": "Monday", "focus": "Full Body Strength A", "exercises": [
+          { "name": "Bodyweight Squat", "sets": 3, "reps": "12", "rest": 60, "muscle": "Quads, Glutes" },
+          { "name": "Push-Up", "sets": 3, "reps": "10", "rest": 60, "muscle": "Chest, Triceps" },
+          { "name": "Dumbbell Row", "sets": 3, "reps": "10", "rest": 60, "muscle": "Back, Biceps" },
+          { "name": "Plank", "sets": 3, "reps": "30s", "rest": 45, "muscle": "Core" },
+          { "name": "Glute Bridge", "sets": 3, "reps": "15", "rest": 45, "muscle": "Glutes" }
+        ]},
+        { "day": "Wednesday", "focus": "Cardio", "duration": 30 },
+        { "day": "Friday", "focus": "Full Body Strength B", "exercises": [
+          { "name": "Lunges", "sets": 3, "reps": "10 each", "rest": 60, "muscle": "Legs" },
+          { "name": "Incline Push-Up", "sets": 3, "reps": "12", "rest": 60, "muscle": "Chest" },
+          { "name": "Resistance Band Pull", "sets": 3, "reps": "12", "rest": 60, "muscle": "Back" },
+          { "name": "Dead Bug", "sets": 3, "reps": "8 each", "rest": 45, "muscle": "Core" }
+        ]}
+      ]
+    },
+    "intermediate": {
+      "label": "Intermediate",
+      "duration": "12 weeks",
+      "sessionsPerWeek": 5,
+      "schedule": [
+        { "day": "Monday", "focus": "Push — Chest, Shoulders, Triceps" },
+        { "day": "Tuesday", "focus": "Pull — Back, Biceps" },
+        { "day": "Wednesday", "focus": "Legs — Quads, Hamstrings, Calves" },
+        { "day": "Thursday", "focus": "Rest / Active Recovery" },
+        { "day": "Friday", "focus": "Push (Variation)" },
+        { "day": "Saturday", "focus": "Cardio + Core" },
+        { "day": "Sunday", "focus": "Rest" }
+      ]
+    },
+    "advanced": {
+      "label": "Advanced",
+      "duration": "16 weeks",
+      "sessionsPerWeek": 6,
+      "schedule": [
+        { "day": "Monday", "focus": "Heavy Squat Day" },
+        { "day": "Tuesday", "focus": "Bench Press Focus" },
+        { "day": "Wednesday", "focus": "Deadlift Day" },
+        { "day": "Thursday", "focus": "Rest" },
+        { "day": "Friday", "focus": "Squat Variation" },
+        { "day": "Saturday", "focus": "OHP + Accessories" },
+        { "day": "Sunday", "focus": "Rest" }
+      ]
+    }
+  }
+}

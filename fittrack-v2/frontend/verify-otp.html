@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify OTP — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.auth-page{min-height:100vh;display:flex;align-items:center;padding:2rem 1rem;background:var(--bg-primary)}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 70% 50%,rgba(244,80,30,0.06),transparent);pointer-events:none}
+.auth-container{width:100%;max-width:460px;margin:0 auto}
+.auth-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;margin-top:5rem}
+.auth-logo{text-align:center;margin-bottom:2rem}
+.auth-logo a{font-family:var(--font-display);font-size:2rem;letter-spacing:2px;text-decoration:none;color:inherit}
+.auth-logo span{color:var(--accent)}
+.auth-title{font-family:var(--font-display);font-size:2rem;letter-spacing:1px;text-align:center;margin-bottom:0.5rem}
+.auth-sub{text-align:center;color:var(--text-secondary);font-size:0.9rem;margin-bottom:2rem}
+.otp-inputs{display:flex;gap:10px;justify-content:center;margin:1.5rem 0}
+.otp-digit{width:52px;height:60px;text-align:center;font-size:1.6rem;font-weight:700;
+  background:var(--bg-input,#1a1a1a);border:2px solid var(--border);border-radius:10px;
+  color:var(--text-primary,#fff);outline:none;transition:border-color .2s}
+.otp-digit:focus{border-color:var(--accent,#f4501e)}
+.otp-digit.filled{border-color:rgba(244,80,30,0.5)}
+.email-badge{background:rgba(244,80,30,0.08);border:1px solid rgba(244,80,30,0.2);
+  border-radius:8px;padding:0.6rem 1rem;text-align:center;font-size:0.85rem;
+  color:var(--text-secondary);margin-bottom:1.5rem;word-break:break-all}
+.email-badge strong{color:var(--accent)}
+.timer-bar{text-align:center;font-size:0.82rem;color:var(--text-secondary);margin-bottom:1.5rem}
+.timer-bar #timerVal{color:var(--accent);font-weight:700}
+.form-error{color:#ef4444;font-size:0.82rem;margin-top:0.4rem;display:none}
+.form-error.show{display:block}
+.resend-row{text-align:center;margin-top:1rem;font-size:0.85rem;color:var(--text-secondary)}
+.resend-row button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;
+  padding:0;text-decoration:underline}
+.resend-row button:disabled{color:var(--text-secondary);text-decoration:none;cursor:default}
+.step-reset{display:none}
+.step-reset.active{display:block}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">FIT<span>TRACK</span></a>
+</nav>
+<div class="auth-bg"></div>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo"><a href="index.html">FIT<span>TRACK</span></a></div>
+
+      <!-- ── STEP 1: Enter OTP ── -->
+      <div id="stepOtp">
+        <h1 class="auth-title" id="otpTitle">VERIFY EMAIL</h1>
+        <p class="auth-sub" id="otpSub">Enter the 6-digit code we sent you</p>
+        <div class="email-badge">Code sent to <strong id="emailDisplay">…</strong></div>
+        <div class="timer-bar">⏳ Expires in <span id="timerVal">5:00</span></div>
+        <div class="otp-inputs">
+          <input class="otp-digit" id="d0" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+          <input class="otp-digit" id="d1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-digit" id="d2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-digit" id="d3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-digit" id="d4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="otp-digit" id="d5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="form-error" id="otpError"></div>
+        <button class="btn btn-primary btn-full btn-lg" id="verifyBtn" onclick="submitOtp()">
+          <span id="verifyText">Verify Code</span>
+          <span class="spinner hidden" id="verifySpinner"></span>
+        </button>
+        <div class="resend-row">
+          Didn't receive it?
+          <button id="resendBtn" disabled onclick="resendOtp()">Resend OTP</button>
+          <span id="resendTimer"></span>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: New Password (reset flow only) ── -->
+      <div id="stepNewPwd" class="step-reset">
+        <h1 class="auth-title">NEW PASSWORD</h1>
+        <p class="auth-sub">OTP verified ✅ — Set your new password</p>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="newPassword" class="form-control" placeholder="Min. 8 characters" required>
+            <button type="button" class="input-toggle" onclick="togglePwd('newPassword',this)">👁</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="confirmNewPassword" class="form-control" placeholder="Repeat password" required>
+          </div>
+          <div class="form-error" id="pwdError"></div>
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" id="resetPwdBtn" onclick="submitNewPassword()">
+          <span id="resetPwdText">Save New Password</span>
+          <span class="spinner hidden" id="resetPwdSpinner"></span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script>
+// ── Read URL params ──────────────────────────────────────────
+const params  = new URLSearchParams(window.location.search);
+const purpose = params.get('purpose') || 'register';   // 'register' | 'reset'
+const email   = decodeURIComponent(params.get('email') || '');
+
+document.getElementById('emailDisplay').textContent = email || '(unknown)';
+
+if (purpose === 'reset') {
+  document.getElementById('otpTitle').textContent = 'RESET PASSWORD';
+  document.getElementById('otpSub').textContent   = 'Enter the OTP sent to your email';
+}
+
+// ── OTP digit inputs ─────────────────────────────────────────
+const digits = Array.from({length:6}, (_,i) => document.getElementById('d'+i));
+
+digits.forEach((el, i) => {
+  el.addEventListener('input', e => {
+    const val = e.target.value.replace(/\D/g,'');
+    e.target.value = val.slice(-1);
+    if (val && i < 5) digits[i+1].focus();
+    el.classList.toggle('filled', !!e.target.value);
+  });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !el.value && i > 0) digits[i-1].focus();
+  });
+  el.addEventListener('paste', e => {
+    e.preventDefault();
+    const pasted = (e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);
+    pasted.split('').forEach((ch,j) => { if(digits[j]) { digits[j].value=ch; digits[j].classList.add('filled'); }});
+    if (pasted.length) digits[Math.min(pasted.length,5)].focus();
+  });
+});
+
+// ── Countdown timer (5 min) ───────────────────────────────────
+let secondsLeft = 300;
+const timerEl   = document.getElementById('timerVal');
+const resendBtn = document.getElementById('resendBtn');
+const resendTimerEl = document.getElementById('resendTimer');
+
+const countdown = setInterval(() => {
+  secondsLeft--;
+  const m = String(Math.floor(secondsLeft/60)).padStart(2,'0');
+  const s = String(secondsLeft % 60).padStart(2,'0');
+  timerEl.textContent = `${m}:${s}`;
+  if (secondsLeft <= 0) {
+    clearInterval(countdown);
+    timerEl.textContent = '00:00';
+    timerEl.style.color = '#ef4444';
+    resendBtn.disabled  = false;
+    resendTimerEl.textContent = '';
+  }
+}, 1000);
+
+// ── Submit OTP ────────────────────────────────────────────────
+async function submitOtp() {
+  const otp = digits.map(d => d.value).join('');
+  if (otp.length < 6) {
+    showErr('otpError', 'Please enter all 6 digits'); return;
+  }
+  hideErr('otpError');
+  setLoading('verifyBtn','verifyText','verifySpinner', true, 'Verifying…');
+
+  const endpoint = purpose === 'reset' ? '/api/auth/verify-reset-otp' : '/api/auth/verify-register';
+  try {
+    const res  = await fetch(endpoint, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, otp}),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showErr('otpError', data.error || 'Invalid OTP');
+      if (data.attempts_left === 0) resendBtn.disabled = false;
+      setLoading('verifyBtn','verifyText','verifySpinner', false, 'Verify Code');
+      return;
+    }
+    clearInterval(countdown);
+    if (purpose === 'register') {
+      showToast('Email verified! Redirecting to login…', 'success');
+      setTimeout(() => window.location.href = 'login.html', 1500);
+    } else {
+      // Show new-password form
+      document.getElementById('stepOtp').style.display    = 'none';
+      document.getElementById('stepNewPwd').classList.add('active');
+    }
+  } catch(e) {
+    showErr('otpError', 'Network error. Please try again.');
+    setLoading('verifyBtn','verifyText','verifySpinner', false, 'Verify Code');
+  }
+}
+
+// ── Resend OTP ────────────────────────────────────────────────
+async function resendOtp() {
+  resendBtn.disabled = true;
+  try {
+    const res  = await fetch('/api/auth/resend-otp', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, purpose}),
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Failed to resend', 'error'); resendBtn.disabled=false; return; }
+    showToast('New OTP sent! Check your inbox.', 'success');
+    digits.forEach(d => { d.value=''; d.classList.remove('filled'); });
+    digits[0].focus();
+    // Restart timer
+    secondsLeft = 300;
+    timerEl.style.color = '';
+    const rt = setInterval(() => {
+      secondsLeft--;
+      const m = String(Math.floor(secondsLeft/60)).padStart(2,'0');
+      const s = String(secondsLeft % 60).padStart(2,'0');
+      timerEl.textContent = `${m}:${s}`;
+      if (secondsLeft<=0) { clearInterval(rt); resendBtn.disabled=false; }
+    }, 1000);
+  } catch(e) {
+    showToast('Network error', 'error'); resendBtn.disabled=false;
+  }
+}
+
+// ── New Password (reset flow) ─────────────────────────────────
+async function submitNewPassword() {
+  const pwd  = document.getElementById('newPassword').value;
+  const cpwd = document.getElementById('confirmNewPassword').value;
+  hideErr('pwdError');
+  if (pwd.length < 8)  { showErr('pwdError','Password must be at least 8 characters'); return; }
+  if (pwd !== cpwd)    { showErr('pwdError','Passwords do not match'); return; }
+
+  setLoading('resetPwdBtn','resetPwdText','resetPwdSpinner', true, 'Saving…');
+  try {
+    const res  = await fetch('/api/auth/reset-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, new_password: pwd}),
+    });
+    const data = await res.json();
+    if (!res.ok) { showErr('pwdError', data.error || 'Failed'); setLoading('resetPwdBtn','resetPwdText','resetPwdSpinner',false,'Save New Password'); return; }
+    showToast('Password reset! Redirecting to login…', 'success');
+    setTimeout(() => window.location.href = 'login.html', 1500);
+  } catch(e) {
+    showErr('pwdError','Network error'); setLoading('resetPwdBtn','resetPwdText','resetPwdSpinner',false,'Save New Password');
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function showErr(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+function hideErr(id)      { document.getElementById(id).classList.remove('show'); }
+function setLoading(btnId, textId, spinnerId, loading, label) {
+  document.getElementById(btnId).disabled     = loading;
+  document.getElementById(textId).textContent = label;
+  document.getElementById(spinnerId).classList.toggle('hidden', !loading);
+}
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+
+digits[0].focus();
+</script>
+</body>
+</html>

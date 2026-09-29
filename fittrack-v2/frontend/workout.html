@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Workouts — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<script>!function(){var d=localStorage.getItem("darkMode")==="true";document.documentElement.setAttribute("data-theme",d?"light":"dark")}();</script>
+<style>
+.page-header{padding:2.5rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.page-title{font-family:var(--font-display);font-size:3.5rem;letter-spacing:2px;margin-bottom:0.25rem}
+.workout-content{display:grid;grid-template-columns:1fr 380px;gap:2rem}
+.plan-tabs-content{background:var(--bg-secondary);border-radius:var(--radius-sm);padding:0.3rem;display:flex;gap:0.25rem;margin-bottom:1.5rem}
+.plan-tab{flex:1;padding:0.6rem;text-align:center;font-family:var(--font-condensed);font-size:0.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);border-radius:4px;cursor:pointer;transition:all 0.2s;border:none;background:none}
+.plan-tab.active{background:var(--bg-card);color:var(--accent);border:1px solid var(--border-accent)}
+.plan-content{display:none}.plan-content.active{display:block}
+
+/* Week grid */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;margin-bottom:1.5rem}
+.day-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 0.4rem 0.6rem;text-align:center;transition:all 0.2s;cursor:pointer;position:relative;user-select:none}
+.day-card:hover{border-color:var(--border-accent);transform:translateY(-1px)}
+.day-card.active-day{background:var(--accent-light);border-color:var(--border-accent);box-shadow:0 0 0 1px var(--border-accent)}
+.day-card.rest{opacity:0.55}
+.day-card.rest:hover{opacity:0.8}
+.day-name{font-family:var(--font-condensed);font-size:0.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.35rem;display:flex;align-items:center;justify-content:center;gap:3px}
+.today-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+.day-icon{font-size:1.3rem;line-height:1}
+.day-label{font-size:0.6rem;color:var(--text-secondary);margin-top:0.3rem}
+.today-badge{font-family:var(--font-condensed);font-size:0.5rem;font-weight:700;letter-spacing:1px;background:var(--accent);color:#fff;border-radius:3px;padding:1px 4px;margin-top:0.3rem;display:inline-block}
+
+/* Exercise list */
+.exercise-list{display:flex;flex-direction:column;gap:0.75rem}
+.exercise-item{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem;display:flex;align-items:center;gap:1rem;transition:all 0.2s}
+.exercise-item:hover{border-color:var(--border-accent)}
+.ex-num{font-family:var(--font-display);font-size:1.8rem;color:var(--accent);opacity:0.4;width:40px;text-align:center;line-height:1}
+.ex-info{flex:1}
+.ex-name{font-weight:700;font-size:0.95rem;margin-bottom:0.2rem}
+.ex-meta{font-size:0.78rem;color:var(--text-muted)}
+.ex-badge-col{display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end}
+
+/* Log sidebar */
+.log-sidebar{display:flex;flex-direction:column;gap:1.5rem}
+.recent-list{display:flex;flex-direction:column;gap:0.5rem}
+.recent-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--border);font-size:0.85rem}
+.recent-item-icon{width:36px;height:36px;border-radius:8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ri-info{flex:1}
+.ri-name{font-weight:700}
+.ri-meta{font-size:0.75rem;color:var(--text-muted)}
+
+@media(max-width:1024px){.workout-content{grid-template-columns:1fr}.week-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:600px){.week-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div id="navbarMount"></div>
+<div class="app-shell" id="appShell">
+  <div id="sidebarMount"></div>
+  <main class="app-main">
+    <div class="page-header">
+      <div class="section-tag">Training Center</div>
+      <h1 class="page-title">WORKOUT PLANS</h1>
+      <p class="text-secondary">Choose your level, follow your plan, and track your progress.</p>
+    </div>
+
+    <div class="workout-content">
+      <!-- LEFT: PLANS -->
+      <div>
+        <div class="plan-tabs-content">
+          <button class="plan-tab active" onclick="switchPlan(this,'beginner')">🌱 Beginner</button>
+          <button class="plan-tab" onclick="switchPlan(this,'intermediate')">⚡ Intermediate</button>
+          <button class="plan-tab" onclick="switchPlan(this,'advanced')">🔥 Advanced</button>
+        </div>
+
+        <!-- BEGINNER -->
+        <div class="plan-content active" id="plan-beginner">
+          <!-- Week grid built by JS — Mon→Sun visual order, TODAY auto-highlighted -->
+          <div class="week-grid" id="week-grid-beginner"></div>
+          <div class="flex-between mb-2">
+            <h3 class="font-condensed" id="heading-beginner" style="font-size:1.1rem;letter-spacing:1px">TODAY'S WORKOUT</h3>
+            <span class="badge badge-green">Beginner</span>
+          </div>
+          <div class="exercise-list" id="exercises-beginner">
+            <div style="color:var(--text-muted);padding:1rem">Loading today's exercises…</div>
+          </div>
+        </div>
+
+        <!-- INTERMEDIATE -->
+        <div class="plan-content" id="plan-intermediate">
+          <div class="week-grid" id="week-grid-intermediate"></div>
+          <div class="flex-between mb-2">
+            <h3 class="font-condensed" id="heading-intermediate" style="font-size:1.1rem;letter-spacing:1px">TODAY'S WORKOUT</h3>
+            <span class="badge badge-yellow">Intermediate</span>
+          </div>
+          <div class="exercise-list" id="exercises-intermediate">
+            <div style="color:var(--text-muted);padding:1rem">Switch to this plan to see today's exercises.</div>
+          </div>
+        </div>
+
+        <!-- ADVANCED -->
+        <div class="plan-content" id="plan-advanced">
+          <div class="week-grid" id="week-grid-advanced"></div>
+          <div class="flex-between mb-2">
+            <h3 class="font-condensed" id="heading-advanced" style="font-size:1.1rem;letter-spacing:1px">TODAY'S WORKOUT</h3>
+            <span class="badge badge-orange">Advanced</span>
+          </div>
+          <div class="exercise-list" id="exercises-advanced">
+            <div style="color:var(--text-muted);padding:1rem">Switch to this plan to see today's exercises.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <div class="log-sidebar">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Quick Log Workout</span></div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-control" id="qType">
+              <option>Cardio</option><option>Strength</option><option>Yoga</option>
+              <option>HIIT</option><option>Swimming</option><option>Cycling</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Duration (min)</label>
+              <input type="number" class="form-control" id="qDuration" placeholder="30" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Intensity</label>
+              <select class="form-control" id="qIntensity">
+                <option>Low</option><option>Medium</option><option>High</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="logQuickWorkout()">+ Log Workout</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Sessions</span></div>
+          <div class="recent-list" id="recentWorkouts">
+            <div style="color:var(--text-muted);padding:1rem;font-size:0.85rem">Loading…</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">This Week</span>
+            <span class="badge badge-green" id="weekSessions">— Sessions</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <div class="flex-between text-sm"><span class="text-secondary">Total Duration</span><span class="font-condensed" id="weekDuration">—</span></div>
+            <div class="flex-between text-sm"><span class="text-secondary">Total Burned</span><span class="font-condensed text-accent" id="weekCalories">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/workout.js"></script>
+</body>
+</html>

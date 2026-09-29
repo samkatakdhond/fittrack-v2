@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>FitTrack Pro — Reach Your Best</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.hero{min-height:calc(100vh - var(--nav-height));display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:4rem;position:relative;padding:4rem 2rem 4rem;max-width:1280px;margin:0 auto}
+.hero-bg{position:fixed;inset:0;z-index:-1}
+.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(244,80,30,0.08) 0%,transparent 70%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:60px 60px}
+.hero-tag{display:inline-flex;align-items:center;gap:0.75rem;font-family:var(--font-condensed);font-size:0.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-secondary);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:20px;margin-bottom:1.5rem}
+.pulse-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulseDot 1.5s infinite}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.hero-heading{font-family:var(--font-display);font-size:clamp(4rem,9vw,8rem);line-height:0.88;letter-spacing:2px;margin-bottom:1.5rem;color:var(--text-primary)}
+.hero-heading span{color:var(--accent);text-shadow:0 0 40px var(--accent-glow)}
+.hero-sub{font-size:1.1rem;color:var(--text-secondary);line-height:1.7;max-width:480px;margin-bottom:2rem}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.hero-visual{display:flex;justify-content:center;align-items:center}
+.hero-dashboard-preview{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;width:100%;max-width:380px;box-shadow:0 0 60px rgba(244,80,30,0.08)}
+.preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.preview-rings{display:flex;justify-content:space-around;margin-bottom:1.5rem}
+.preview-ring-item{display:flex;flex-direction:column;align-items:center;gap:0.5rem}
+.preview-ring-item .value{font-family:var(--font-display);font-size:1rem;color:var(--text-primary);line-height:1}
+.preview-ring-item .unit{font-family:var(--font-condensed);font-size:0.6rem;letter-spacing:1px;color:var(--text-muted)}
+.preview-workout-list{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem}
+.preview-workout-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.85rem}
+.preview-workout-item.upcoming{opacity:0.5}
+.pwo-name{flex:1;font-weight:600}
+.pwo-time{color:var(--text-muted);font-size:0.78rem}
+.preview-prediction{display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--accent-light);border:1px solid var(--border-accent);border-radius:8px;font-size:0.82rem;color:var(--text-secondary)}
+.marquee-strip{background:var(--accent);padding:0.8rem 0;overflow:hidden;position:relative}
+.marquee-track{display:flex;gap:2rem;animation:marquee 30s linear infinite;white-space:nowrap;font-family:var(--font-condensed);font-weight:700;font-size:0.82rem;letter-spacing:2px;color:#fff}
+.marquee-track .dot{color:rgba(255,255,255,0.5);font-size:0.5rem}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:3rem}
+.feature-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;transition:all 0.3s}
+.feature-card:hover{border-color:var(--border-accent);transform:translateY(-4px)}
+.feature-card--accent{background:linear-gradient(135deg,var(--accent-light),rgba(244,80,30,0.06));border-color:var(--border-accent)}
+.feature-icon{font-size:2.5rem;margin-bottom:1rem}
+.feature-card h3{font-family:var(--font-condensed);font-size:1.2rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-primary);margin-bottom:0.75rem}
+.feature-card p{color:var(--text-secondary);font-size:0.9rem;line-height:1.6}
+.how-section{background:var(--bg-secondary)}
+.steps-grid{display:flex;align-items:flex-start;gap:0;margin:3rem 0}
+.step-item{flex:1;padding:2rem}
+.step-number{font-family:var(--font-display);font-size:5rem;color:var(--accent);line-height:1;margin-bottom:1rem;opacity:0.3}
+.step-content h3{font-family:var(--font-condensed);font-size:1.2rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.75rem}
+.step-content p{color:var(--text-secondary);font-size:0.9rem;line-height:1.6}
+.step-connector{width:1px;background:var(--border);align-self:stretch;margin-top:4rem}
+.cta-center{text-align:center;margin-top:3rem}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.hero-visual{display:none}.features-grid{grid-template-columns:1fr 1fr}.steps-grid{flex-direction:column}}
+@media(max-width:600px){.features-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">FIT<span>TRACK</span></a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+  </div>
+  <div class="nav-actions">
+    <a href="login.html" class="btn btn-outline btn-sm">Log In</a>
+    <a href="register.html" class="btn btn-primary btn-sm">Sign Up Free</a>
+  </div>
+</nav>
+<div class="hero-bg"><div class="hero-overlay"></div><div class="hero-grid"></div></div>
+<div class="page-wrapper">
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-tag"><span class="pulse-dot"></span>AI-Powered Fitness Tracking</div>
+      <h1 class="hero-heading">REACH<br>YOUR <span>BEST</span></h1>
+      <p class="hero-sub">Track workouts, monitor nutrition, and get personalized insights powered by machine learning. Join thousands crushing their goals every day.</p>
+      <div class="hero-actions">
+        <a href="register.html" class="btn btn-primary btn-lg">Get Started Free</a>
+        <a href="login.html" class="btn btn-outline btn-lg">Already a member?</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-dashboard-preview">
+        <div class="preview-header">
+          <span class="font-condensed text-secondary" style="font-size:0.78rem;letter-spacing:1.5px">TODAY'S SUMMARY</span>
+          <span class="badge badge-green">● ACTIVE</span>
+        </div>
+        <div class="preview-rings">
+          <div class="preview-ring-item">
+            <svg width="78" height="78" viewBox="0 0 78 78"><circle cx="39" cy="39" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/><circle cx="39" cy="39" r="30" fill="none" stroke="#f4501e" stroke-width="7" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="50" transform="rotate(-90 39 39)"/></svg>
+            <div><span class="value">1840</span><br><span class="unit">CALORIES</span></div>
+          </div>
+          <div class="preview-ring-item">
+            <svg width="78" height="78" viewBox="0 0 78 78"><circle cx="39" cy="39" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/><circle cx="39" cy="39" r="30" fill="none" stroke="#22c55e" stroke-width="7" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="70" transform="rotate(-90 39 39)"/></svg>
+            <div><span class="value">560</span><br><span class="unit">BURNED</span></div>
+          </div>
+          <div class="preview-ring-item">
+            <svg width="78" height="78" viewBox="0 0 78 78"><circle cx="39" cy="39" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="7"/><circle cx="39" cy="39" r="30" fill="none" stroke="#3b82f6" stroke-width="7" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="100" transform="rotate(-90 39 39)"/></svg>
+            <div><span class="value">22.4</span><br><span class="unit">BMI</span></div>
+          </div>
+        </div>
+        <div class="preview-workout-list">
+          <div class="preview-workout-item"><span>🏋️</span><span class="pwo-name">Strength Training</span><span class="pwo-time">45 min</span><span class="badge badge-orange">Done</span></div>
+          <div class="preview-workout-item"><span>🏃</span><span class="pwo-name">Morning Run</span><span class="pwo-time">30 min</span><span class="badge badge-green">Done</span></div>
+          <div class="preview-workout-item upcoming"><span>🧘</span><span class="pwo-name">Yoga Session</span><span class="pwo-time">20 min</span><span class="badge badge-blue">Upcoming</span></div>
+        </div>
+        <div class="preview-prediction"><span>🤖</span><span>ML Insight: On track to lose <strong>0.8 kg</strong> this week!</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="marquee-strip"><div class="marquee-track"><span>STRENGTH TRAINING</span><span class="dot">●</span><span>CALORIE TRACKING</span><span class="dot">●</span><span>BMI MONITORING</span><span class="dot">●</span><span>ML PREDICTIONS</span><span class="dot">●</span><span>DIET PLANNING</span><span class="dot">●</span><span>PROGRESS INSIGHTS</span><span class="dot">●</span><span>WORKOUT PLANS</span><span class="dot">●</span><span>ACHIEVEMENT BADGES</span><span class="dot">●</span><span>STRENGTH TRAINING</span><span class="dot">●</span><span>CALORIE TRACKING</span><span class="dot">●</span><span>BMI MONITORING</span><span class="dot">●</span><span>ML PREDICTIONS</span><span class="dot">●</span><span>DIET PLANNING</span><span class="dot">●</span><span>PROGRESS INSIGHTS</span><span class="dot">●</span><span>WORKOUT PLANS</span><span class="dot">●</span><span>ACHIEVEMENT BADGES</span><span class="dot">●</span></div></div>
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-tag">Why FitTrack Pro</div>
+    <h2 class="section-heading">EVERYTHING<br>YOU NEED</h2>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">📊</div><h3>Smart Dashboard</h3><p>Visualize calories, BMI, workout frequency and progress in one powerful, real-time dashboard with Chart.js.</p></div>
+      <div class="feature-card feature-card--accent"><div class="feature-icon">🤖</div><h3>ML Predictions</h3><p>Our AI analyzes your patterns to predict weight changes and suggest optimizations to your routine.</p></div>
+      <div class="feature-card"><div class="feature-icon">🥗</div><h3>Diet Planning</h3><p>Get personalized meal plans based on your fitness goal — weight loss, muscle gain, or maintenance.</p></div>
+      <div class="feature-card"><div class="feature-icon">💪</div><h3>Workout Plans</h3><p>Beginner to advanced programs with weekly schedules, exercise guides, and progress tracking.</p></div>
+      <div class="feature-card"><div class="feature-icon">🏆</div><h3>Achievements</h3><p>Earn badges for consistency, milestones, and personal records. Stay motivated with gamification.</p></div>
+      <div class="feature-card"><div class="feature-icon">📱</div><h3>Mobile Ready</h3><p>Fully responsive design that works seamlessly on every device, anywhere, anytime.</p></div>
+    </div>
+  </div>
+</section>
+<section class="section how-section" id="how-it-works">
+  <div class="container">
+    <div class="section-tag">Simple Process</div>
+    <h2 class="section-heading">HOW IT<br>WORKS</h2>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-number">01</div><div class="step-content"><h3>Create Your Profile</h3><p>Enter your age, weight, height, and fitness goal to get a personalized experience.</p></div></div>
+      <div class="step-connector"></div>
+      <div class="step-item"><div class="step-number">02</div><div class="step-content"><h3>Log Workouts &amp; Diet</h3><p>Track every workout session and meal. Our smart forms make input fast and easy.</p></div></div>
+      <div class="step-connector"></div>
+      <div class="step-item"><div class="step-number">03</div><div class="step-content"><h3>Get AI Insights</h3><p>ML algorithms analyze your data to predict progress and suggest improvements.</p></div></div>
+    </div>
+    <div class="cta-center"><a href="register.html" class="btn btn-primary btn-lg">Start Your Journey</a></div>
+  </div>
+</section>
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="nav-logo mb-2"><img src="assets/logo.png" alt="FitTrack Pro" style="height:28px;vertical-align:middle"></div><p class="text-secondary text-sm">AI-powered fitness companion. Built for Flask + MySQL backend.</p></div>
+      <div class="footer-links"><h4 class="footer-heading">Pages</h4><a href="dashboard.html">Dashboard</a><a href="workout.html">Workouts</a><a href="diet.html">Nutrition</a><a href="profile.html">Profile</a></div>
+      <div class="footer-links"><h4 class="footer-heading">Account</h4><a href="login.html">Login</a><a href="register.html">Register</a></div>
+    </div>
+    <div class="footer-bottom"><span class="text-muted text-sm">© 2026 FitTrack Pro. Ready for Flask + MySQL Backend.</span></div>
+  </div>
+</footer>
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+</body>
+</html>

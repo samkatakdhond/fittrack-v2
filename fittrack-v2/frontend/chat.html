@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>FitBot AI — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<script>!function(){var d=localStorage.getItem("darkMode")==="true";document.documentElement.setAttribute("data-theme",d?"light":"dark")}();</script>
+<style>
+/* ── Full-screen layout ─────────────────────────────────── */
+html, body { height: 100%; overflow: hidden; }
+
+.page-wrapper { padding-top: var(--nav-height); height: 100vh; display: flex; flex-direction: column; }
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  overflow-y: auto;
+  height: 100%;
+}
+.sidebar-nav    { display:flex; flex-direction:column; gap:0.25rem; padding:0 1rem; }
+.sidebar-link   { display:flex; align-items:center; gap:0.75rem; padding:0.72rem 1rem; border-radius:var(--radius-sm); color:var(--text-secondary); font-family:var(--font-condensed); font-size:0.88rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; transition:all 0.2s; }
+.sidebar-link:hover  { color:var(--text-primary); background:var(--border); }
+.sidebar-link.active { color:var(--accent); background:var(--accent-light); border:1px solid var(--border-accent); }
+.sidebar-icon   { font-size:1.1rem; width:24px; text-align:center; }
+.sidebar-section{ font-family:var(--font-condensed); font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); padding:1.25rem 1rem 0.4rem; }
+
+/* ── Chat right column ──────────────────────────────────── */
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  background: var(--bg-primary);
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+.chat-header-left { display:flex; align-items:center; gap:0.75rem; }
+.fitbot-avatar {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--accent), #ff8c42);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 0 18px var(--accent-glow);
+  flex-shrink: 0;
+}
+.chat-title    { font-family:var(--font-display); font-size:1.5rem; letter-spacing:1px; line-height:1; }
+.chat-subtitle { font-family:var(--font-condensed); font-size:0.7rem; letter-spacing:1px; color:var(--text-muted); }
+.status-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 6px var(--green);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.35} }
+.header-actions { display:flex; align-items:center; gap:0.6rem; }
+.hdr-btn {
+  font-family:var(--font-condensed); font-size:0.72rem; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase;
+  color:var(--text-muted); background:none;
+  border:1px solid var(--border); border-radius:6px;
+  cursor:pointer; padding:0.32rem 0.75rem; transition:all 0.2s;
+  display:flex; align-items:center; gap:0.35rem;
+}
+.hdr-btn:hover { color:#ef4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.07); }
+
+/* ── Messages scroll area ───────────────────────────────── */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  scroll-behavior: smooth;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background:#222; border-radius:2px; }
+
+/* ── Welcome ────────────────────────────────────────────── */
+.chat-welcome {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  flex:1; text-align:center; gap:0.85rem; padding:2rem;
+  min-height: 300px;
+}
+.welcome-icon  { font-size:3.2rem; }
+.welcome-title { font-family:var(--font-display); font-size:2rem; letter-spacing:1px; }
+.welcome-sub   { color:var(--text-secondary); font-size:0.88rem; max-width:400px; line-height:1.65; }
+.welcome-chips { display:flex; flex-wrap:wrap; gap:0.45rem; justify-content:center; margin-top:0.4rem; }
+.chip {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:20px; padding:0.42rem 0.95rem;
+  font-size:0.8rem; color:var(--text-secondary);
+  cursor:pointer; transition:all 0.2s;
+  font-family:var(--font-condensed); font-weight:700; letter-spacing:0.5px;
+}
+.chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
+
+/* ── Message bubbles ────────────────────────────────────── */
+.message {
+  display: flex;
+  gap: 0.65rem;
+  animation: msgIn 0.22s ease;
+  position: relative;
+  /* each side sets its own alignment — no shared max-width */
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Bot message: left-aligned, wide ── */
+.message.bot-msg {
+  align-self: flex-start;
+  max-width: 75%;
+}
+
+/* ── User message: right-aligned, shrinks to content ── */
+.message.user-msg {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+  /* key: the wrapper only grows as wide as its content */
+  max-width: 70%;
+  width: fit-content;
+  min-width: 0;
+}
+.user-msg .msg-content {
+  /* allow flex child to shrink below intrinsic size */
+  min-width: 0;
+  width: fit-content;
+  align-items: flex-end;
+}
+.user-msg .msg-bubble {
+  /* bubble wraps text tightly — no stretching */
+  display: inline-block;
+  width: auto;
+  min-width: 0;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.msg-avatar {
+  width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.78rem; font-weight:700; flex-shrink:0; margin-top:3px;
+}
+.user-msg .msg-avatar { background:var(--accent); color:#fff; }
+.bot-msg  .msg-avatar { background:linear-gradient(135deg,var(--accent),#ff8c42); font-size:0.95rem; }
+
+.msg-content { display:flex; flex-direction:column; }
+.user-msg .msg-content { align-items:flex-end; }
+
+.msg-bubble {
+  padding:0.78rem 1rem;
+  border-radius:14px;
+  font-size:0.88rem;
+  line-height:1.62;
+  word-wrap:break-word;
+  white-space:pre-wrap;
+  position: relative;
+}
+.user-msg .msg-bubble {
+  background:var(--accent); color:#fff;
+  border-radius:14px 3px 14px 14px;
+}
+.bot-msg .msg-bubble {
+  background:var(--bg-card); border:1px solid var(--border);
+  color:var(--text-primary); border-radius:3px 14px 14px 14px;
+}
+.bot-msg .msg-bubble.streaming { border-color:var(--border-accent); }
+
+.msg-time {
+  font-size:0.65rem; color:var(--text-muted); margin-top:0.22rem;
+  font-family:var(--font-condensed); letter-spacing:0.5px;
+}
+.user-msg .msg-time { text-align:right; }
+
+/* ── Delete button on message hover ────────────────────── */
+.msg-delete {
+  position:absolute; top:-6px; right:-6px;
+  width:20px; height:20px; border-radius:50%;
+  background:#1a1a1a; border:1px solid var(--border);
+  color:var(--text-muted); font-size:0.6rem;
+  cursor:pointer; display:none;
+  align-items:center; justify-content:center;
+  transition:all 0.15s; z-index:10;
+}
+.msg-delete:hover { background:#ef4444; border-color:#ef4444; color:#fff; }
+.message:hover .msg-delete { display:flex; }
+.user-msg .msg-delete { right:auto; left:-6px; }
+
+/* ── Typing ─────────────────────────────────────────────── */
+.typing-dots span {
+  display:inline-block; width:5px; height:5px;
+  border-radius:50%; background:var(--text-muted); margin:0 2px;
+  animation:bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+/* ── Error ──────────────────────────────────────────────── */
+.error-bubble {
+  background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25);
+  color:#fca5a5; font-size:0.82rem; padding:0.75rem 1rem;
+  border-radius:10px; align-self:center; max-width:75%;
+  text-align:center; line-height:1.55; white-space:pre-line;
+}
+
+/* ── Input bar ──────────────────────────────────────────── */
+.chat-input-bar {
+  padding: 0.85rem 1.75rem 1rem;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.chat-input-wrap {
+  display:flex; align-items:flex-end; gap:0.65rem;
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:12px; padding:0.55rem 0.55rem 0.55rem 1rem;
+  transition:border-color 0.2s;
+}
+.chat-input-wrap:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
+#chatInput {
+  flex:1; background:transparent; border:none; outline:none;
+  color:var(--text-primary); font-size:0.92rem; line-height:1.5;
+  resize:none; max-height:130px; font-family:var(--font-body); padding:0.2rem 0;
+}
+#chatInput::placeholder { color:var(--text-muted); }
+.send-btn {
+  width:38px; height:38px; background:var(--accent); border:none;
+  border-radius:9px; color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.05rem; transition:all 0.2s; flex-shrink:0;
+}
+.send-btn:hover:not(:disabled) { background:var(--accent-hover); transform:translateY(-1px); }
+.send-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+.input-hint {
+  text-align:center; font-size:0.67rem; color:var(--text-muted);
+  margin-top:0.4rem; font-family:var(--font-condensed); letter-spacing:0.5px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:768px) {
+  html, body { overflow: auto; }
+  .chat-layout { grid-template-columns: 1fr; }
+  .sidebar     { display:none; }
+  .message     { max-width:90%; }
+  .chat-main   { height: calc(100vh - var(--nav-height)); }
+}
+</style>
+</head>
+<body>
+
+<div id="navbarMount"></div>
+<div class="app-shell" id="appShell">
+  <div id="sidebarMount"></div>
+  <main class="app-main" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - var(--nav-height));overflow:hidden">
+    <!-- Chat Area -->
+    <div class="chat-main">
+
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="fitbot-avatar">🤖</div>
+          <div>
+            <div class="chat-title">FITBOT AI</div>
+            <div class="chat-subtitle">Your personal fitness coach</div>
+          </div>
+          <div class="status-dot" title="Ollama running locally"></div>
+        </div>
+        <div class="header-actions">
+          <button class="hdr-btn" onclick="clearHistory()">🗑 Clear All</button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-welcome" id="chatWelcome">
+          <div class="welcome-icon">🏋️</div>
+          <div class="welcome-title">HEY, I'M FITBOT</div>
+          <div class="welcome-sub">
+            I can see your real workouts, meals, weight and goals.
+            Ask me anything for personalised fitness advice.
+          </div>
+          <div class="welcome-chips">
+            <div class="chip" onclick="sendChip(this)">What should I eat today?</div>
+            <div class="chip" onclick="sendChip(this)">Am I on track for my goal?</div>
+            <div class="chip" onclick="sendChip(this)">Give me a workout plan</div>
+            <div class="chip" onclick="sendChip(this)">How many calories should I eat?</div>
+            <div class="chip" onclick="sendChip(this)">Analyse my week</div>
+            <div class="chip" onclick="sendChip(this)">Tips to improve progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-bar">
+        <div class="chat-input-wrap">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="Ask FitBot anything about your fitness…"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)" autocomplete="off"
+          ></textarea>
+          <button class="send-btn" id="sendBtn" type="button" onclick="sendMessage()">➤</button>
+        </div>
+        <div class="input-hint">Enter to send · Shift+Enter for new line · Powered by Ollama (local)</div>
+      </div>
+
+    </div><!-- /chat-main -->
+  </main>
+</div><!-- /app-shell -->
+
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/chat.js"></script>
+</body>
+</html>

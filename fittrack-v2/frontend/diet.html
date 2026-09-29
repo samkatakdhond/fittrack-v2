@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<title>Nutrition — FitTrack Pro</title>
+<link rel="stylesheet" href="css/style.css">
+<script>!function(){var d=localStorage.getItem("darkMode")==="true";document.documentElement.setAttribute("data-theme",d?"light":"dark")}();</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.page-header{padding:2.5rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.page-title{font-family:var(--font-display);font-size:3.5rem;letter-spacing:2px;margin-bottom:0.25rem}
+.diet-layout{display:grid;grid-template-columns:1fr 360px;gap:2rem}
+.meal-section{margin-bottom:1.5rem}
+.meal-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+.meal-section-title{font-family:var(--font-condensed);font-size:1rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem}
+.meal-entries{display:flex;flex-direction:column;gap:0.4rem}
+.meal-entry{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;transition:all 0.2s}
+.meal-entry:hover{border-color:var(--border-accent)}
+.me-name{flex:1;font-weight:600}
+.me-cal{font-family:var(--font-condensed);font-size:0.82rem;color:var(--accent);font-weight:700;letter-spacing:0.5px}
+.me-delete{color:var(--text-muted);cursor:pointer;transition:color 0.2s;background:none;border:none;padding:0.2rem;font-size:0.9rem}
+.me-delete:hover{color:#ef4444}
+.diet-plan-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;transition:all 0.2s}
+.diet-plan-card:hover{border-color:var(--border-accent)}
+.diet-plan-title{font-family:var(--font-condensed);font-size:1rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.25rem}
+.food-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem}
+.food-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:0.2rem 0.65rem;font-size:0.76rem;color:var(--text-secondary);font-family:var(--font-condensed);letter-spacing:0.5px}
+.macro-ring{display:flex;justify-content:center;margin:1rem 0}
+.macro-legend{display:flex;flex-direction:column;gap:0.5rem}
+.macro-item{display:flex;align-items:center;justify-content:space-between;font-size:0.85rem}
+.macro-dot{width:10px;height:10px;border-radius:50%;margin-right:0.5rem}
+@media(max-width:1024px){.diet-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="navbarMount"></div>
+<div class="app-shell" id="appShell">
+  <div id="sidebarMount"></div>
+  <main class="app-main">
+    <div class="page-header">
+      <div class="section-tag">Nutrition Center</div>
+      <h1 class="page-title">NUTRITION</h1>
+      <p class="text-secondary">Track your meals and get personalized diet plans based on your goal.</p>
+    </div>
+    <div class="diet-layout">
+      <!-- LEFT: TRACKER + PLAN -->
+      <div>
+        <!-- TODAY TRACKER -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Today's Food Log</span><span id="totalCalDisplay" class="badge badge-orange">0 kcal logged</span></div>
+          
+          <!-- BREAKFAST -->
+          <div class="meal-section">
+            <div class="meal-section-header">
+              <span class="meal-section-title">☀️ Breakfast</span>
+              <button class="btn btn-sm btn-outline" onclick="openAddMeal('breakfast')">+ Add</button>
+            </div>
+            <div class="meal-entries" id="breakfast-entries"></div>
+          </div>
+          <hr class="divider">
+          <!-- LUNCH -->
+          <div class="meal-section">
+            <div class="meal-section-header">
+              <span class="meal-section-title">🌤️ Lunch</span>
+              <button class="btn btn-sm btn-outline" onclick="openAddMeal('lunch')">+ Add</button>
+            </div>
+            <div class="meal-entries" id="lunch-entries"></div>
+          </div>
+          <hr class="divider">
+          <!-- DINNER -->
+          <div class="meal-section">
+            <div class="meal-section-header">
+              <span class="meal-section-title">🌙 Dinner</span>
+              <button class="btn btn-sm btn-outline" onclick="openAddMeal('dinner')">+ Add</button>
+            </div>
+            <div class="meal-entries" id="dinner-entries"></div>
+          </div>
+          <hr class="divider">
+          <!-- SNACKS -->
+          <div class="meal-section">
+            <div class="meal-section-header">
+              <span class="meal-section-title">🍎 Snacks</span>
+              <button class="btn btn-sm btn-outline" onclick="openAddMeal('snack')">+ Add</button>
+            </div>
+            <div class="meal-entries" id="snack-entries"></div>
+          </div>
+        </div>
+
+        <!-- DIET PLANS -->
+        <div class="card-header mb-2 mt-4"><span class="card-title" style="font-size:1rem">RECOMMENDED DIET PLANS</span></div>
+        <div id="dietPlans">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <!-- CALORIE SUMMARY -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Calorie Summary</span></div>
+          <div class="macro-ring">
+            <canvas id="macroChart" width="160" height="160"></canvas>
+          </div>
+          <div class="macro-legend">
+            <div class="macro-item"><div style="display:flex;align-items:center"><div class="macro-dot" style="background:#f4501e"></div>Calories In</div><span class="font-condensed" id="calIn">0 kcal</span></div>
+            <div class="macro-item"><div style="display:flex;align-items:center"><div class="macro-dot" style="background:#22c55e"></div>Remaining</div><span class="font-condensed text-green" id="calRemain">2000 kcal</span></div>
+            <div class="macro-item"><div style="display:flex;align-items:center"><div class="macro-dot" style="background:#3b82f6"></div>Burned</div><span class="font-condensed text-blue">560 kcal</span></div>
+          </div>
+          <hr class="divider">
+          <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem">
+            <div class="flex-between"><span class="text-secondary">Daily Goal</span><span class="font-condensed">2,000 kcal</span></div>
+            <div class="flex-between"><span class="text-secondary">Net Calories</span><span class="font-condensed" id="netCalories">-560 kcal</span></div>
+          </div>
+        </div>
+
+        <!-- ADD MEAL FORM -->
+        <div class="card" id="addMealCard">
+          <div class="card-header"><span class="card-title" id="addMealTitle">Add Meal</span></div>
+          <div class="form-group"><label class="form-label">Meal Type</label>
+            <select class="form-control" id="mealType">
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="snack">Snack</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Food Name</label><input type="text" class="form-control" id="foodName" placeholder="e.g. Oats with Banana"></div>
+          <div class="form-group"><label class="form-label">Calories (kcal)</label><input type="number" class="form-control" id="foodCal" placeholder="350" min="0"></div>
+          <div class="form-group"><label class="form-label">Category</label>
+            <select class="form-control" id="foodCat">
+              <option>🥩 Protein</option><option>🥦 Vegetables</option><option>🍞 Carbs</option><option>🥑 Fats</option><option>🥛 Dairy</option><option>🍎 Fruits</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="addMealEntry()">+ Add to Log</button>
+        </div>
+
+        <!-- ML DIET INSIGHT -->
+        <div class="card" style="background:var(--accent-light);border-color:var(--border-accent)">
+          <div style="font-family:var(--font-condensed);font-size:0.74rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem">🤖 DIET INSIGHTS</div>
+          <div id="dietInsights" style="font-size:0.85rem;color:var(--text-secondary);display:flex;flex-direction:column;gap:0.6rem">
+            <div>✅ You're in a healthy calorie range for weight loss.</div>
+            <div>⚠️ Protein intake might be low — add eggs or chicken.</div>
+            <div>💡 Drinking water before meals can reduce intake by 75 kcal.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<script src="js/utils.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/diet.js"></script>
+</body>
+</html>

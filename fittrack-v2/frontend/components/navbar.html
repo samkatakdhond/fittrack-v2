@@ -1,0 +1,30 @@
+<!-- ══════════════════════════════════════════════════════
+     FitTrack Global Navbar Component
+     Loaded by js/navbar.js on every app page
+══════════════════════════════════════════════════════ -->
+<nav class="navbar app-layout" id="globalNavbar">
+  <button class="nav-hamburger" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">☰</button>
+  <a href="dashboard.html" class="nav-logo">FIT<span>TRACK</span></a>
+
+  <div class="nav-right-cluster">
+    <!-- Theme Toggle -->
+    <button class="nav-theme-btn" id="darkModeBtn" onclick="toggleDarkMode()" title="Toggle theme" aria-label="Toggle dark mode">🌙</button>
+
+    <!-- Export (dashboard only — hidden on other pages via JS) -->
+    <div class="nav-export-wrap" id="navExportWrap" style="display:none">
+      <button class="nav-export-btn" id="exportToggleBtn" onclick="toggleExportMenu()">⬇&nbsp;<span>Export</span></button>
+      <div class="nav-export-menu" id="exportMenu">
+        <a href="/api/export/csv" id="csvLink">📊 Download CSV</a>
+        <a href="/api/export/pdf" id="pdfLink">📄 Download Report</a>
+      </div>
+    </div>
+
+    <!-- User chip — click → profile -->
+    <div class="nav-user-chip" id="navUserChip" onclick="window.location.href='profile.html'" title="Go to Profile">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <span id="navName">User</span>
+    </div>
+
+    <button class="nav-logout-btn" onclick="logout()">Logout</button>
+  </div>
+</nav>
